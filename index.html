@@ -1,0 +1,2002 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0f766e">
+  <meta name="description" content="اوقات نماز سوزا، شمارش معکوس اذان و اقامه، مصحف تصویری قرآن کریم">
+  <title>اوقات نماز سوزا و مصحف شریف</title>
+
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="icon" href="./icon-192.png">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+    :root {
+      --primary: #0f766e;
+      --background: #f2f5f3;
+      --ink: #15231f;
+      --muted: #66756f;
+      --surface: #ffffff;
+      --line: color-mix(in srgb, var(--primary) 13%, #e4e9e6);
+      --tint: color-mix(in srgb, var(--primary) 9%, #fff);
+      --tint-2: color-mix(in srgb, var(--primary) 16%, #fff);
+      --deep: color-mix(in srgb, var(--primary) 62%, #04110e);
+      --sand: #c9a45c;
+      --good: #12805c;
+      --bad: #c2374f;
+      --radius: 20px;
+      --shadow: 0 1px 2px rgba(16,40,34,.05), 0 10px 28px -14px rgba(16,40,34,.22);
+      --star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cg fill='none' stroke='%23fff' stroke-opacity='.11' stroke-width='1'%3E%3Crect x='14' y='14' width='28' height='28'/%3E%3Crect x='14' y='14' width='28' height='28' transform='rotate(45 28 28)'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0; min-height: 100vh; color: var(--ink);
+      background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, var(--background)) 0, var(--background) 320px), var(--background);
+      font-family: "Vazirmatn", Tahoma, sans-serif; line-height: 1.7;
+      -webkit-font-smoothing: antialiased;
+    }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+    :focus-visible { outline: 3px solid color-mix(in srgb, var(--primary) 55%, #fff); outline-offset: 2px; }
+    .container { width: min(100% - 24px, 720px); margin: 0 auto; padding: 14px 0 calc(104px + env(safe-area-inset-bottom, 0px)); }
+    .hidden { display: none !important; }
+
+    /* header */
+    header {
+      position: relative; overflow: hidden; color: #fff; border-radius: 26px;
+      padding: 22px 22px 20px;
+      background: var(--star), linear-gradient(135deg, var(--deep), color-mix(in srgb, var(--primary) 85%, #000));
+      box-shadow: 0 18px 36px -18px color-mix(in srgb, var(--primary) 80%, #000);
+    }
+    header h1 { margin: 0; font-size: clamp(1.5rem, 5.5vw, 2rem); font-weight: 800; line-height: 1.35; }
+    header p { margin: 2px 0 0; font-size: .86rem; color: rgba(255,255,255,.78); }
+    #todayLine {
+      display: inline-block; margin-top: 14px; padding: 5px 14px; border-radius: 999px;
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2);
+      color: #fff; font-size: .88rem; font-weight: 600;
+    }
+
+    /* buttons */
+    button, .button {
+      border: 0; border-radius: 14px; padding: 11px 18px; color: #fff; font-weight: 700;
+      background: var(--primary);
+      transition: background-color .18s, transform .12s, box-shadow .18s;
+    }
+    button:hover { background: color-mix(in srgb, var(--primary) 88%, #000); }
+    button:active { transform: scale(.97); }
+    button.secondary { color: var(--primary); background: var(--tint-2); }
+    button.secondary:hover { background: color-mix(in srgb, var(--primary) 22%, #fff); }
+    button.active { background: var(--deep); }
+
+    /* cards */
+    .card {
+      background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 20px; margin-top: 14px; box-shadow: var(--shadow);
+    }
+    .card h2 { margin: 0 0 12px; font-size: 1.1rem; font-weight: 800; }
+    h3 { font-size: 1rem; font-weight: 800; margin: 22px 0 6px; }
+    .panel-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin: 22px 4px 2px; }
+    .panel-top h2 { margin: 0; font-size: 1.4rem; font-weight: 800; }
+    .panel-top .secondary { display: none; }
+    #mushafPanel .panel-top { margin: 0 0 12px; }
+    .note, .status { color: var(--muted); line-height: 1.9; font-size: .88rem; margin: 6px 0; }
+    .status { min-height: 1.5em; }
+
+    /* countdown (hero) */
+    .countdown-card { margin-top: 14px; padding: 20px 22px; }
+    .countdown-card h2 { color: var(--muted); font-size: .9rem; font-weight: 700; margin-bottom: 14px; }
+    .countdown-pair { grid-template-columns: 1fr 1fr !important; gap: 0 !important; }
+    .countdown-pair > div { padding: 2px 4px; }
+    .countdown-pair > div + div { border-inline-start: 1px solid var(--line); padding-inline-start: 22px; }
+    .countdown-card .label { color: var(--muted); font-size: .84rem; font-weight: 600; }
+    .countdown {
+      direction: ltr; text-align: right; margin-top: 4px; font-weight: 800; color: var(--primary);
+      font-size: clamp(1.45rem, 6.6vw, 2.4rem); line-height: 1.25; letter-spacing: 0; font-variant-numeric: tabular-nums;
+    }
+    #countdown { color: var(--ink); }
+    .countdown-card .note { margin-top: 14px; padding-top: 12px; border-top: 1px dashed var(--line); font-size: .8rem; }
+    @media (max-width: 420px) { .countdown-pair > div + div { padding-inline-start: 14px; } }
+
+    /* prayers */
+    .prayer-grid { display: flex; flex-direction: column; gap: 6px; }
+    .prayer {
+      --c1: var(--primary);
+      display: grid; grid-template-columns: 42px minmax(0,1fr) auto; column-gap: 14px; align-items: center;
+      padding: 10px 14px; min-height: 62px; border-radius: 16px;
+      background: var(--tint); border: 1px solid transparent;
+      transition: background-color .2s;
+    }
+    .prayer .p-icon {
+      grid-column: 1; grid-row: 1 / 3; width: 42px; height: 42px; border-radius: 13px; display: grid; place-items: center;
+      color: var(--c1); background: color-mix(in srgb, var(--c1) 14%, #fff);
+    }
+    .prayer .p-icon svg { width: 22px; height: 22px; }
+    .prayer .label { grid-column: 2; grid-row: 1; align-self: end; color: var(--ink); font-size: 1rem; font-weight: 700; }
+    .prayer .subvalue { grid-column: 2; grid-row: 2; align-self: start; margin: 0; color: var(--muted); font-size: .78rem; font-weight: 500; }
+    .prayer:not(:has(.subvalue)) .label { grid-row: 1 / 3; align-self: center; }
+    .prayer .value {
+      grid-column: 3; grid-row: 1 / 3; margin: 0; font-size: 1.4rem; font-weight: 800;
+      font-variant-numeric: tabular-nums; letter-spacing: .5px;
+    }
+    .prayer.next { background: var(--deep); color: #fff; box-shadow: 0 14px 26px -16px var(--deep); }
+    .prayer.next .p-icon { background: rgba(255,255,255,.16); color: #fff; }
+    .prayer.next .label, .prayer.next .value { color: #fff; }
+    .prayer.next .subvalue { color: rgba(255,255,255,.75); }
+    .prayer.next .label::after {
+      content: "بعدی"; margin-inline-start: 8px; padding: 1px 9px; border-radius: 999px;
+      font-size: .7rem; font-weight: 700; color: var(--deep); background: var(--sand); vertical-align: 2px;
+    }
+
+    /* moon */
+    .moon-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .moon-item { --c1: var(--primary); padding: 14px; border-radius: 16px; background: var(--tint); }
+    .m-icon {
+      width: 38px; height: 38px; display: grid; place-items: center; border-radius: 12px; margin-bottom: 10px;
+      color: var(--c1); background: color-mix(in srgb, var(--c1) 15%, #fff);
+    }
+    .m-icon svg { width: 20px; height: 20px; }
+    .label { color: var(--muted); font-size: .84rem; font-weight: 600; }
+    .moon-item strong { display: block; margin-top: 4px; font-weight: 800; line-height: 1.6; font-size: 1rem; unicode-bidi: plaintext; }
+    .moon-item strong.num { direction: ltr; text-align: right; unicode-bidi: isolate; font-variant-numeric: tabular-nums; }
+    .moon-item strong.positive { color: var(--good); }
+    .moon-item strong.negative { color: var(--bad); }
+    .moon-item + .moon-item { margin: 0; }
+    .card > button { margin-top: 6px; }
+    .event-list { display: grid; gap: 8px; margin-top: 12px; }
+    .event-row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: 14px; background: var(--tint); }
+    .event-dot { display: grid; place-items: center; flex: 0 0 34px; height: 34px; border-radius: 11px; color: #fff; font-weight: 800; background: var(--primary); }
+    .event-date { color: var(--muted); font-size: .84rem; margin-top: 2px; font-weight: 500; }
+
+    /* mushaf */
+    .mushaf-tools { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 12px; }
+    .mushaf-page-wrap {
+      background: #f4ecd8; border: 1px solid #e3d5b0; border-radius: 18px; padding: 10px; text-align: center;
+      box-shadow: inset 0 0 0 4px #f9f3e3, 0 14px 30px -18px rgba(70,50,20,.5);
+      touch-action: pan-y; user-select: none; -webkit-user-select: none;
+    }
+    #mushafImage { display: block; width: 100%; max-width: 540px; max-height: 72vh; object-fit: contain; margin: 0 auto; border-radius: 8px; -webkit-user-drag: none; -webkit-touch-callout: none; background: #f4ecd8; }
+    .mushaf-caption { text-align: center; color: var(--muted); font-size: .84rem; margin: 10px 0 0; }
+    .offset-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: .8rem; color: var(--muted); }
+    .offset-row button { padding: 4px 14px; border-radius: 10px; font-size: 1.1rem; line-height: 1.3; }
+    .offset-row b { min-width: 24px; text-align: center; color: var(--ink); direction: ltr; }
+    .source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0 16px; }
+    .source-card { border: 1.5px solid var(--line); border-radius: 16px; padding: 10px; background: #fff; text-align: center; color: var(--ink); }
+    .source-card img { width: 100%; height: 140px; object-fit: contain; background: #f4ecd8; border-radius: 10px; display: block; margin-bottom: 8px; }
+    .source-card.selected { border-color: var(--primary); background: var(--tint); }
+    .surah-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; margin-top: 10px; }
+    .surah-card {
+      display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 14px; cursor: pointer;
+      background: var(--tint); transition: background-color .15s; text-align: right;
+    }
+    .surah-card:hover { background: var(--tint-2); }
+    .surah-num { flex: 0 0 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; font-weight: 800; font-size: .82rem; color: var(--primary); background: #fff; border: 1px solid var(--line); }
+    .surah-name { font-weight: 700; font-size: .9rem; }
+    .surah-meta { color: var(--muted); font-size: .76rem; font-weight: 500; }
+
+    /* adhkar */
+    .adhkar-list { display: grid; gap: 10px; }
+    .dhikr-item { padding: 14px 16px; border-radius: 16px; background: var(--tint); }
+    .dhikr-text { font-size: 1.3rem; line-height: 2.1; text-align: justify; }
+    .dhikr-meta { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; color: var(--muted); font-size: .84rem; margin-top: 8px; padding-top: 8px; border-top: 1px dashed var(--line); }
+    .tasbih-count {
+      width: 176px; height: 176px; margin: 18px auto 8px; display: grid; place-items: center; border-radius: 50%;
+      font-size: 3.4rem; font-weight: 800; color: var(--primary); font-variant-numeric: tabular-nums;
+      background: var(--tint); box-shadow: inset 0 0 0 10px var(--tint-2), inset 0 0 0 11px var(--line);
+    }
+    .tasbih-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    #tasbihTap { border-radius: 20px; box-shadow: 0 12px 22px -12px var(--primary); }
+
+    /* radio */
+    .radio-list { display: grid; gap: 10px; }
+    .radio-card {
+      --rc1: var(--primary);
+      display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: center;
+      padding: 14px; border-radius: 18px; background: var(--tint); border: 1.5px solid transparent;
+      transition: border-color .2s, background-color .2s;
+    }
+    .radio-card.playing { border-color: var(--rc1); background: color-mix(in srgb, var(--rc1) 10%, #fff); }
+    .radio-avatar { width: 52px; height: 52px; border-radius: 16px; display: grid; place-items: center; color: var(--rc1); background: color-mix(in srgb, var(--rc1) 15%, #fff); font-size: 1.5rem; }
+    .radio-avatar svg { width: 26px; height: 26px; }
+    .radio-info h3 { margin: 0 0 2px; font-size: .98rem; }
+    .radio-info .radio-sub { color: var(--muted); font-size: .8rem; font-weight: 500; display: flex; align-items: center; gap: 8px; }
+    .eq { display: inline-flex; align-items: flex-end; gap: 2px; height: 14px; }
+    .eq span { display: block; width: 3px; border-radius: 2px; background: var(--rc1); height: 4px; opacity: .35; }
+    .radio-card.playing .eq span { opacity: 1; animation: eqBounce .9s ease-in-out infinite; }
+    .radio-card.playing .eq span:nth-child(2) { animation-delay: .15s; }
+    .radio-card.playing .eq span:nth-child(3) { animation-delay: .3s; }
+    .radio-card.playing .eq span:nth-child(4) { animation-delay: .45s; }
+    .radio-card.playing .eq span:nth-child(5) { animation-delay: .1s; }
+    @keyframes eqBounce { 0%,100% { height: 4px; } 50% { height: 14px; } }
+    .radio-btn { width: 50px; height: 50px; border-radius: 50%; display: grid; place-items: center; padding: 0; color: #fff; background: var(--rc1); }
+    .radio-btn:hover { background: var(--rc1); filter: brightness(.92); }
+    .radio-btn svg { width: 20px; height: 20px; }
+    .radio-btn .pause-icon { display: none; }
+    .radio-card.playing .radio-btn .play-icon { display: none; }
+    .radio-card.playing .radio-btn .pause-icon { display: block; }
+    .volume-row { grid-column: 1 / -1; display: flex; align-items: center; gap: 12px; padding-top: 10px; border-top: 1px dashed var(--line); }
+    .volume-row .vol-icon { color: var(--muted); display: grid; place-items: center; }
+    .volume-row .vol-icon svg { width: 20px; height: 20px; }
+    .volume-row input[type="range"] { -webkit-appearance: none; appearance: none; flex: 1; direction: ltr; height: 6px; border-radius: 999px; background: linear-gradient(90deg, var(--rc1) var(--vol, 80%), #dde5e1 var(--vol, 80%)); outline: none; cursor: pointer; }
+    .volume-row input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--rc1); box-shadow: 0 2px 6px rgba(0,0,0,.2); }
+    .volume-row input[type="range"]::-moz-range-thumb { width: 20px; height: 20px; border-radius: 50%; background: #fff; border: 3px solid var(--rc1); }
+    .volume-row .vol-value { color: var(--muted); font-size: .8rem; font-weight: 700; min-width: 42px; text-align: left; direction: ltr; }
+
+    /* settings */
+    .settings-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+    .settings-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+    .setting { display: grid; gap: 6px; color: var(--muted); font-weight: 600; font-size: .88rem; }
+    input[type="number"], select {
+      width: 100%; border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px;
+      background: #fff; color: var(--ink); font-weight: 700; transition: border-color .15s, box-shadow .15s;
+    }
+    input[type="number"]:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 4px color-mix(in srgb, var(--primary) 16%, transparent); }
+    input[type="color"] { width: 64px; height: 44px; padding: 2px; border: 1.5px solid var(--line); background: #fff; border-radius: 12px; cursor: pointer; }
+    .check-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; margin-top: 10px; border-radius: 14px; background: var(--tint); font-weight: 600; font-size: .92rem; cursor: pointer; }
+    .check-row input[type="checkbox"] { order: 2; margin-inline-start: auto; flex: none; appearance: none; -webkit-appearance: none; width: 46px; height: 28px; border-radius: 999px; background: #c5d0cb; position: relative; cursor: pointer; transition: background-color .2s; }
+    .check-row input[type="checkbox"]::after { content: ""; position: absolute; top: 3px; inset-inline-start: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: inset-inline-start .2s; }
+    .check-row input[type="checkbox"]:checked { background: var(--primary); }
+    .check-row input[type="checkbox"]:checked::after { inset-inline-start: 21px; }
+
+    /* bottom navigation */
+    .bottom-nav {
+      position: fixed; z-index: 50; left: 50%; transform: translateX(-50%);
+      bottom: calc(8px + env(safe-area-inset-bottom, 0px)); width: min(100% - 16px, 560px);
+      display: grid; grid-template-columns: repeat(6, 1fr); gap: 2px; padding: 6px;
+      background: rgba(255,255,255,.92); -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+      border: 1px solid var(--line); border-radius: 22px; box-shadow: 0 14px 34px -10px rgba(16,40,34,.35);
+    }
+    .bottom-nav button {
+      display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 7px 0 5px;
+      color: var(--muted); background: transparent; border-radius: 16px; font-size: .68rem; font-weight: 700;
+    }
+    .bottom-nav button:hover { background: var(--tint); }
+    .bottom-nav svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .bottom-nav button[aria-current="page"] { color: var(--primary); background: var(--tint-2); }
+
+    footer { text-align: center; color: var(--muted); margin-top: 24px; font-size: .82rem; }
+
+    @media (max-width: 480px) {
+      .container { width: min(100% - 16px, 720px); padding-top: 8px; }
+      header { border-radius: 22px; padding: 18px; }
+      .card { padding: 16px; border-radius: 18px; }
+      .radio-card { gap: 11px; padding: 12px; }
+      .radio-avatar { width: 46px; height: 46px; }
+      .radio-btn { width: 46px; height: 46px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+
+    /* ============ نمای تمام‌صفحهٔ واقعی ============ */
+    .mushaf-fullscreen {
+      position: fixed; inset: 0; z-index: 99999;
+      background: #0d0a17;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0)
+               env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+      touch-action: none;
+      overscroll-behavior: none;
+    }
+    .mushaf-fullscreen img {
+      width: 100vw;
+      height: 100vh;
+      height: 100dvh;
+      max-width: 100vw;
+      max-height: 100vh;
+      object-fit: fill;
+      user-select: none;
+      -webkit-user-drag: none;
+      -webkit-touch-callout: none;
+      background: #f5edda;
+    }
+    .mushaf-fullscreen .fs-hint {
+      position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,.65);
+      font-size: .78rem; font-weight: 600;
+      background: rgba(0,0,0,.45);
+      padding: 6px 14px; border-radius: 999px;
+      pointer-events: none;
+      user-select: none;
+    }
+    .mushaf-fullscreen .fs-exit {
+      position: fixed; top: 12px; left: 12px;
+      z-index: 100000;
+      padding: 8px 14px; border-radius: 999px; font-size: .85rem;
+      background: rgba(255,255,255,.18); color: #fff;
+      border: 1px solid rgba(255,255,255,.3);
+      box-shadow: none;
+      backdrop-filter: blur(8px);
+    }
+    .mushaf-fullscreen .fs-exit:hover { background: rgba(255,255,255,.3); }
+    /* crop frame: cuts the ornamental border off the red-mushaf pages */
+    .crop-frame { display: contents; }
+    .crop-frame.on {
+      --L: .152; --R: .148; --T: .108; --B: .099;
+      --w: calc(1 - var(--L) - var(--R)); --h: calc(1 - var(--T) - var(--B));
+      display: block; position: relative; overflow: hidden; direction: ltr; background: #fff;
+      aspect-ratio: var(--ar, .41); margin: 0 auto;
+      width: min(100%, 540px, calc(72vh * var(--ar, .41)));
+    }
+    .crop-frame.on img {
+      position: absolute !important; max-width: none !important; max-height: none !important;
+      width: calc(100% / var(--w)) !important; height: auto !important;
+      left: calc(-100% * var(--L) / var(--w)); top: calc(-100% * var(--T) / var(--h));
+      margin: 0 !important; border-radius: 0 !important; object-fit: fill !important;
+    }
+    .mushaf-page-wrap.cropped { padding: 0; background: #fff; border-color: var(--line); box-shadow: none; overflow: hidden; }
+    .mushaf-fullscreen.cropped { background: #fff; }
+    .mushaf-fullscreen .crop-frame.on { width: 100vw; height: 100vh; height: 100dvh; max-width: none; aspect-ratio: auto; margin: 0; }
+    .mushaf-fullscreen .crop-frame.on img { height: calc(100% / var(--h)) !important; }
+    .mushaf-fullscreen .fs-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100000; direction: rtl;
+      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px;
+      padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 10px;
+      background: rgba(30,30,30,.93); color: #fff; font-weight: 700; font-size: clamp(.8rem, 3.5vw, 1rem); white-space: nowrap;
+      transform: translateY(-100%); opacity: 0; pointer-events: none;
+      transition: transform .22s ease, opacity .22s ease;
+    }
+    .mushaf-fullscreen .fs-bar.show { transform: none; opacity: 1; }
+    .fs-bar .fs-page { direction: ltr; font-size: 1.25rem; font-variant-numeric: tabular-nums; }
+    .fs-bar .fs-juz { justify-self: start; }
+    .fs-bar .fs-surah { justify-self: end; }
+    .mushaf-fullscreen:fullscreen { background: #0d0a17; }
+    .mushaf-fullscreen:-webkit-full-screen { background: #0d0a17; }
+    .mushaf-fullscreen.cropped:fullscreen, .mushaf-fullscreen.cropped:-webkit-full-screen { background: #fff; }
+  </style>
+</head>
+
+<body>
+  <main class="container">
+    <header>
+      <h1>اوقات نماز سوزا</h1>
+      <p>سوزا، جزیرهٔ قشم · روش محاسبهٔ ام‌القری · فقه شافعی</p>
+      <p id="todayLine">در حال دریافت تاریخ…</p>
+    </header>
+
+    <section id="homePanel">
+      <div class="card countdown-card">
+        <h2>مانده تا اذان و اقامه</h2>
+        <div class="countdown-pair" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;position:relative">
+          <div>
+            <div id="nextAdhanName" class="label">تا اذان بعدی</div>
+            <div id="adhanCountdown" class="countdown">--:--:--</div>
+          </div>
+          <div>
+            <div id="nextPrayerName" class="label">تا اقامهٔ بعدی</div>
+            <div id="countdown" class="countdown">--:--:--</div>
+          </div>
+        </div>
+        <p class="note">زمان اقامه بر اساس تأخیرهای تنظیم‌شده در تنظیمات محاسبه می‌شود.</p>
+      </div>
+
+      <div class="card">
+        <h2>نمازهای امروز</h2>
+        <div id="prayerGrid" class="prayer-grid">
+          <p class="status">در حال دریافت اوقات نماز…</p>
+        </div>
+        <p id="prayerStatus" class="status"></p>
+      </div>
+
+    </section>
+
+    <section id="mushafPanel" class="hidden">
+      <div class="card">
+        <div class="panel-top"><h2>مصحف شریف</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
+
+        <div class="mushaf-tools">
+          <button id="mushafFullscreenBtn" class="secondary" type="button">⛶ نمای تمام‌صفحه</button>
+          <button id="mushafCropBtn" class="secondary hidden" type="button" aria-pressed="true">حذف حاشیه: روشن</button>
+        </div>
+
+        <div class="mushaf-page-wrap" id="mushafPageWrap">
+          <div class="crop-frame" id="mushafFrame">
+            <img id="mushafImage" src="" alt="صفحهٔ مصحف شریف" loading="eager">
+          </div>
+          <p id="mushafStatus" class="mushaf-caption" aria-live="polite">در حال بارگذاری…</p>
+          <div id="redOffsetRow" class="offset-row hidden">
+            <span>اگر شمارهٔ صفحه با تصویر نمی‌خواند، تنظیم کنید:</span>
+            <button type="button" class="secondary" id="redOffsetMinus" aria-label="یک برگ قبل">−</button>
+            <b id="redOffsetValue">0</b>
+            <button type="button" class="secondary" id="redOffsetPlus" aria-label="یک برگ بعد">+</button>
+          </div>
+        </div>
+
+        <h3 style="margin-top:20px">انتخاب منبع صفحات با پیش‌نمایش</h3>
+        <p class="note">یکی از سه منبع را انتخاب کنید. انتخاب شما ذخیره می‌شود؛ اگر منبع انتخابی در دسترس نباشد، برنامه منابع دیگر را نیز امتحان می‌کند.</p>
+        <div id="mushafSourcePicker" class="source-grid"></div>
+        <p class="mushaf-caption" style="margin-top:14px">برای جابجایی صفحه، روی تصویر بکشید (Swipe) یا از فهرست سوره‌ها استفاده کنید.</p>
+
+        <h3 style="margin-top:22px">فهرست سوره‌ها</h3>
+        <div id="surahList" class="surah-list"></div>
+
+        <p class="mushaf-caption">تصاویر صفحات از منبع انتخابی بارگذاری می‌شوند؛ برای نمایش صفحات و پیش‌نمایش‌ها اتصال اینترنت لازم است.</p>
+      </div>
+    </section>
+
+    <section id="adhkarPanel" class="hidden">
+      <div class="panel-top"><h2>اذکار و تسبیح</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
+      <div class="card">
+        <h2>اذکار صبحگاهی</h2>
+        <p class="note">ذکرهای کوتاه و رایج برای یادآوری روزانه. تعداد پیشنهادی کنار هر ذکر آمده است.</p>
+        <div id="morningAdhkar" class="adhkar-list"></div>
+      </div>
+      <div class="card">
+        <h2>اذکار شامگاهی</h2>
+        <div id="eveningAdhkar" class="adhkar-list"></div>
+      </div>
+      <div class="card">
+        <h2>تسبیح هوشمند</h2>
+        <p class="note">شمارش با لمس دکمه انجام می‌شود و پس از بستن صفحه نیز شمارش در همین دستگاه می‌ماند.</p>
+        <label class="setting">ذکر مورد نظر
+          <select id="tasbihPhrase"><option>سُبْحَانَ اللَّهِ</option><option>الْحَمْدُ لِلَّهِ</option><option>اللَّهُ أَكْبَرُ</option><option>أَسْتَغْفِرُ اللَّهَ</option><option>لَا إِلَهَ إِلَّا اللَّهُ</option><option>اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ</option></select>
+        </label>
+        <label class="setting" style="margin-top:12px">هدف شمارش
+          <select id="tasbihTarget"><option value="33">۳۳</option><option value="100" selected>۱۰۰</option><option value="300">۳۰۰</option><option value="1000">۱۰۰۰</option><option value="0">بدون هدف</option></select>
+        </label>
+        <div id="tasbihPhrasePreview" class="dhikr-text" style="text-align:center;margin-top:14px">سُبْحَانَ اللَّهِ</div>
+        <div id="tasbihCount" class="tasbih-count">۰</div>
+        <p id="tasbihStatus" class="status" style="text-align:center">برای شروع دکمه را لمس کنید.</p>
+        <div class="tasbih-actions"><button id="tasbihTap" type="button" style="min-width:150px;min-height:64px;font-size:1.1rem">+ یک ذکر</button><button id="tasbihUndo" class="secondary" type="button">یک مرحله برگشت</button><button id="tasbihReset" class="secondary" type="button">شروع مجدد</button></div>
+      </div>
+    </section>
+
+    <section id="moonPanel" class="hidden">
+      <div class="panel-top"><h2>رویدادهای نجومی</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
+      <div class="card">
+        <h2>۱. وضعیت نجومی امروز</h2>
+        <p class="note">زمان‌های طلوع و غروب خورشید و ماه برای امروز در سوزا.</p>
+        <button id="calculateTodayMoon" type="button">محاسبه وضعیت امروز</button>
+        <p id="todayMoonStatus" class="status" aria-live="polite">برای نمایش اطلاعات، دکمه را بزنید.</p>
+        <div class="moon-grid" style="margin-top:14px">
+          <div class="moon-item" style="--c1:#f59e0b;--c2:#fcd34d">
+            <div class="m-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>
+            </div>
+            <span class="label">طلوع خورشید</span>
+            <strong id="sunrise">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#ec4899;--c2:#f9a8d4">
+            <div class="m-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>
+            </div>
+            <span class="label">غروب خورشید</span>
+            <strong id="sunset">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#6366f1;--c2:#a5b4fc">
+            <div class="m-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3a5 5 0 0 0 7 7 7 7 0 1 1-7-7Z"/><path d="m15 20 2-2 2 2"/></svg>
+            </div>
+            <span class="label">طلوع ماه</span>
+            <strong id="moonrise">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#8b5cf6;--c2:#c4b5fd">
+            <div class="m-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3a5 5 0 0 0 7 7 7 7 0 1 1-7-7Z"/><path d="m15 18 2 2 2-2"/></svg>
+            </div>
+            <span class="label">غروب ماه</span>
+            <strong id="moonset">—</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>۲. محاسبات ماه نو بر اساس مقارنه</h2>
+        <p class="note">مبنای محاسبه، لحظهٔ دقیق مقارنه و نخستین غروب خورشید پس از آن است؛ محاسبه صرفاً نجومی است و شامل داوری دربارهٔ رؤیت شرعی نیست.</p>
+        <button id="calculateNewMoon" type="button">محاسبه وضعیت ماه نو</button>
+        <p id="newMoonStatus" class="status" aria-live="polite">برای محاسبه ماه نو، دکمه را بزنید.</p>
+
+        <div class="moon-grid" style="margin-top:14px">
+          <div class="moon-item" style="--c1:#6d28d9;--c2:#a78bfa">
+            <div class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg></div>
+            <span class="label">لحظهٔ مقارنه</span>
+            <strong id="newMoon">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#8b5cf6;--c2:#c4b5fd">
+            <div class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3a5 5 0 0 0 7 7 7 7 0 1 1-7-7Z"/><path d="m15 18 2 2 2-2"/></svg></div>
+            <span class="label">غروب ماه</span>
+            <strong id="newMoonMoonset">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#ec4899;--c2:#f9a8d4">
+            <div class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg></div>
+            <span class="label">اولین غروب پس از مقارنه</span>
+            <strong id="firstSunset">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#0891b2;--c2:#67e8f9">
+            <div class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+            <span class="label">سن ماه هنگام اولین غروب</span>
+            <strong id="moonAge" class="num">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#0ea472;--c2:#6ee7b7">
+            <div class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="m5 10 7-7 7 7"/><path d="m5 14 7 7 7-7"/></svg></div>
+            <span class="label">مکث ماه پس از غروب خورشید</span>
+            <strong id="moonLag" class="num">—</strong>
+          </div>
+          <div class="moon-item" style="--c1:#f97316;--c2:#fdba74">
+            <div class="m-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-9-9"/><path d="M21 3v6h-6"/></svg></div>
+            <span class="label">فاصله زاویه‌ای ماه و خورشید</span>
+            <strong id="elongation" class="num">—</strong>
+          </div>
+        </div>
+
+        <h3 style="margin-top:22px">رویدادهای نجومی ۳۰ روز آینده</h3>
+        <div id="moonEvents" class="status">پس از محاسبهٔ ماه نو نمایش داده می‌شود.</div>
+      </div>
+    </section>
+
+    <section id="radioPanel" class="hidden">
+      <div class="panel-top"><h2>رادیو قرآن</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
+      <div class="card">
+        <p class="note">پخش زندهٔ تلاوت قرآن کریم از قاریان مشهور جهان اسلام. برای شروع، دکمهٔ پخش هر شبکه را بزنید.</p>
+
+        <div class="radio-list" style="margin-top:14px">
+
+          <article class="radio-card" id="card-afasy" style="--rc1:#6957d9;--rc2:#a78bfa" data-radio="afasy">
+            <div class="radio-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v13"/><path d="M19 10v4a7 7 0 0 1-14 0v-4"/><path d="M12 21v-2"/><circle cx="12" cy="4" r="2"/>
+              </svg>
+            </div>
+            <div class="radio-info">
+              <h3>رادیو قرآن مشاری العفاسی</h3>
+              <div class="radio-sub">
+                <span class="eq"><span></span><span></span><span></span><span></span><span></span></span>
+                <span class="radio-status">آمادهٔ پخش</span>
+              </div>
+            </div>
+            <button class="radio-btn" type="button" aria-label="پخش / توقف">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>
+            </button>
+            <div class="volume-row">
+              <span class="vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+              <input type="range" class="radio-volume" min="0" max="100" value="80" style="--vol:80%">
+              <span class="vol-value">80%</span>
+            </div>
+          </article>
+
+          <article class="radio-card" id="card-basit" style="--rc1:#b45309;--rc2:#fbbf24" data-radio="basit">
+            <div class="radio-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v13"/><path d="M19 10v4a7 7 0 0 1-14 0v-4"/><path d="M12 21v-2"/><circle cx="12" cy="4" r="2"/>
+              </svg>
+            </div>
+            <div class="radio-info">
+              <h3>رادیو قرآن عبدالباسط عبدالصمد</h3>
+              <div class="radio-sub">
+                <span class="eq"><span></span><span></span><span></span><span></span><span></span></span>
+                <span class="radio-status">آمادهٔ پخش</span>
+              </div>
+            </div>
+            <button class="radio-btn" type="button" aria-label="پخش / توقف">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>
+            </button>
+            <div class="volume-row">
+              <span class="vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+              <input type="range" class="radio-volume" min="0" max="100" value="80" style="--vol:80%">
+              <span class="vol-value">80%</span>
+            </div>
+          </article>
+
+          <article class="radio-card" id="card-muaiqly" style="--rc1:#0e7490;--rc2:#22d3ee" data-radio="muaiqly">
+            <div class="radio-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v13"/><path d="M19 10v4a7 7 0 0 1-14 0v-4"/><path d="M12 21v-2"/><circle cx="12" cy="4" r="2"/>
+              </svg>
+            </div>
+            <div class="radio-info">
+              <h3>رادیو قرآن ماهر المعیقلی</h3>
+              <div class="radio-sub">
+                <span class="eq"><span></span><span></span><span></span><span></span><span></span></span>
+                <span class="radio-status">آمادهٔ پخش</span>
+              </div>
+            </div>
+            <button class="radio-btn" type="button" aria-label="پخش / توقف">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>
+            </button>
+            <div class="volume-row">
+              <span class="vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+              <input type="range" class="radio-volume" min="0" max="100" value="80" style="--vol:80%">
+              <span class="vol-value">80%</span>
+            </div>
+          </article>
+
+          <article class="radio-card" id="card-hazza" style="--rc1:#7c3aed;--rc2:#c084fc" data-radio="hazza">
+            <div class="radio-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v13"/><path d="M19 10v4a7 7 0 0 1-14 0v-4"/><path d="M12 21v-2"/><circle cx="12" cy="4" r="2"/>
+              </svg>
+            </div>
+            <div class="radio-info">
+              <h3>رادیو قرآن هزاع البلوشی</h3>
+              <div class="radio-sub">
+                <span class="eq"><span></span><span></span><span></span><span></span><span></span></span>
+                <span class="radio-status">آمادهٔ پخش</span>
+              </div>
+            </div>
+            <button class="radio-btn" type="button" aria-label="پخش / توقف">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>
+            </button>
+            <div class="volume-row">
+              <span class="vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+              <input type="range" class="radio-volume" min="0" max="100" value="80" style="--vol:80%">
+              <span class="vol-value">80%</span>
+            </div>
+          </article>
+
+          <article class="radio-card" id="card-sufi" style="--rc1:#047857;--rc2:#34d399" data-radio="sufi">
+            <div class="radio-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v13"/><path d="M19 10v4a7 7 0 0 1-14 0v-4"/><path d="M12 21v-2"/><circle cx="12" cy="4" r="2"/>
+              </svg>
+            </div>
+            <div class="radio-info">
+              <h3>رادیو قرآن عبدالرشید صوفی</h3>
+              <div class="radio-sub">
+                <span class="eq"><span></span><span></span><span></span><span></span><span></span></span>
+                <span class="radio-status">آمادهٔ پخش</span>
+              </div>
+            </div>
+            <button class="radio-btn" type="button" aria-label="پخش / توقف">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>
+            </button>
+            <div class="volume-row">
+              <span class="vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+              <input type="range" class="radio-volume" min="0" max="100" value="80" style="--vol:80%">
+              <span class="vol-value">80%</span>
+            </div>
+          </article>
+
+          <article class="radio-card" id="card-basfar" style="--rc1:#b91c1c;--rc2:#f87171" data-radio="basfar">
+            <div class="radio-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 2v13"/><path d="M19 10v4a7 7 0 0 1-14 0v-4"/><path d="M12 21v-2"/><circle cx="12" cy="4" r="2"/>
+              </svg>
+            </div>
+            <div class="radio-info">
+              <h3>رادیو قرآن عبدالله بصفر</h3>
+              <div class="radio-sub">
+                <span class="eq"><span></span><span></span><span></span><span></span><span></span></span>
+                <span class="radio-status">آمادهٔ پخش</span>
+              </div>
+            </div>
+            <button class="radio-btn" type="button" aria-label="پخش / توقف">
+              <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></svg>
+              <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>
+            </button>
+            <div class="volume-row">
+              <span class="vol-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H2v6h4l5 4Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg></span>
+              <input type="range" class="radio-volume" min="0" max="100" value="80" style="--vol:80%">
+              <span class="vol-value">80%</span>
+            </div>
+          </article>
+
+        </div>
+        <p id="radioStatus" class="status" style="margin-top:14px">برای پخش، دکمهٔ هر شبکه را بزنید.</p>
+      </div>
+    </section>
+
+    <section id="settingsPanel" class="hidden">
+      <div class="panel-top"><h2>تنظیمات</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
+      <div class="card">
+        <h2>تنظیمات برنامه</h2>
+        <div class="settings-row" style="margin-bottom:14px">
+          <button id="notifyPermission" type="button">🔔 فعال‌کردن اعلان‌ها</button>
+          <button id="installButton" class="secondary hidden" type="button">⬇ نصب برنامه</button>
+        </div>
+        <p class="note">اوقات نماز از سرویس AlAdhan دریافت می‌شوند. برای دریافت دادهٔ تازه اتصال اینترنت لازم است.</p>
+      </div>
+      <div class="card">
+        <h2>تنظیمات اقامه و اعلان‌ها</h2>
+        <div id="iqamaSettings" class="settings-grid"></div>
+
+        <label class="check-row">
+          <input id="adhkarEnabled" type="checkbox">
+          یادآوری اذکار عصر، ۳۰ دقیقه پیش از مغرب
+        </label>
+        <label class="check-row">
+          <input id="alertsEnabled" type="checkbox">
+          هشدار اقامه، ۱۰ دقیقه پیش از زمان اقامه
+        </label>
+
+        <label class="setting" style="margin-top:14px">
+          تنظیم تاریخ قمری (روز)
+          <input id="hijriAdjustment" type="number" min="-2" max="2" step="1">
+        </label>
+        <p class="note">این تنظیم فقط نمایش تاریخ قمری را به‌اندازهٔ روزهای انتخاب‌شده جابه‌جا می‌کند.</p>
+      </div>
+
+      <div class="card">
+        <h2>رنگ برنامه</h2>
+        <div class="settings-row">
+          <label class="setting">رنگ اصلی
+            <input id="themeColor" type="color" value="#0f766e">
+          </label>
+          <label class="setting">رنگ پس‌زمینه
+            <input id="backgroundColor" type="color" value="#f2f5f3">
+          </label>
+        </div>
+      </div>
+    </section>
+  </main>
+  <nav class="bottom-nav" aria-label="بخش‌های برنامه">
+    <button type="button" data-open="homePanel" aria-current="page"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v10h13V10"/></svg><span>خانه</span></button>
+    <button type="button" data-open="mushafPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h7A3 3 0 0 1 12 7.5V20a2 2 0 0 0-2-2H2z"/><path d="M22 4.5h-7a3 3 0 0 0-3 3V20a2 2 0 0 1 2-2h8z"/></svg><span>مصحف</span></button>
+    <button type="button" data-open="radioPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M16.2 7.8a6 6 0 0 1 0 8.4M7.8 16.2a6 6 0 0 1 0-8.4M19.1 4.9a10 10 0 0 1 0 14.2M4.9 19.1a10 10 0 0 1 0-14.2"/></svg><span>رادیو</span></button>
+    <button type="button" data-open="adhkarPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="4.5" r="2"/><circle cx="5.5" cy="9" r="2"/><circle cx="18.5" cy="9" r="2"/><circle cx="8" cy="16" r="2"/><circle cx="16" cy="16" r="2"/><path d="M12 18v3"/></svg><span>اذکار</span></button>
+    <button type="button" data-open="moonPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg><span>نجوم</span></button>
+    <button type="button" data-open="settingsPanel"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h9M17 6h3M4 12h3M11 12h9M4 18h11M19 18h1"/><circle cx="15" cy="6" r="2"/><circle cx="9" cy="12" r="2"/><circle cx="17" cy="18" r="2"/></svg><span>تنظیمات</span></button>
+  </nav>
+
+  <script>
+    "use strict";
+
+    const LATITUDE = 26.78;
+    const LONGITUDE = 56.06;
+    const TIME_ZONE = "Asia/Tehran";
+    const STORAGE_KEY = "suza-prayer-pwa-settings";
+
+    const ICONS = {
+      sunrise: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v8"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m8 6 4-4 4 4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>',
+      sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>',
+      cloudsun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="M20 12h2"/><path d="m19.07 4.93-1.41 1.41"/><path d="M15.947 12.65a4 4 0 0 0-5.925-4.128"/><path d="M13 22H7a5 5 0 1 1 4.9-6H13a3 3 0 0 1 0 6Z"/></svg>',
+      sunset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 10V2"/><path d="m4.93 10.93 1.41 1.41"/><path d="M2 18h2"/><path d="M20 18h2"/><path d="m19.07 10.93-1.41 1.41"/><path d="M22 22H2"/><path d="m16 6-4 4-4-4"/><path d="M16 18a4 4 0 0 0-8 0"/></svg>',
+      moonstar: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/><path d="M19 3v4"/><path d="M21 5h-4"/></svg>'
+    };
+
+    const PRAYERS = [
+      { key: "Fajr",    name: "فجر",  icon: "sunrise",  c1: "#6366f1", c2: "#a5b4fc" },
+      { key: "Dhuhr",   name: "ظهر",  icon: "sun",      c1: "#f59e0b", c2: "#fcd34d" },
+      { key: "Asr",     name: "عصر",  icon: "cloudsun", c1: "#0ea5e9", c2: "#7dd3fc" },
+      { key: "Maghrib", name: "مغرب", icon: "sunset",   c1: "#ec4899", c2: "#f9a8d4" },
+      { key: "Isha",    name: "عشا",  icon: "moonstar", c1: "#4f46e5", c2: "#818cf8" }
+    ];
+
+    const RADIOS = {
+      afasy: { title: "رادیو قرآن مشاری العفاسی", urls: ["https://backup.qurango.net/radio/mishary_alafasi"] },
+      basit: { title: "رادیو قرآن عبدالباسط عبدالصمد", urls: ["https://backup.qurango.net/radio/abdulbasit_abdulsamad"] },
+      muaiqly: { title: "رادیو قرآن ماهر المعیقلی", urls: ["https://backup.qurango.net/radio/maher_almuaiqly"] },
+      hazza: { title: "رادیو قرآن هزاع البلوشی", urls: ["https://backup.qurango.net/radio/hazza_al_balushi"] },
+      sufi: { title: "رادیو قرآن عبدالرشید صوفی", urls: ["https://qurango.net/radio/abdulrasheed_soufi_khalaf", "https://backup.qurango.net/radio/abdulrasheed_soufi_khalaf", "https://qurango.net/radio/abdulrasheed_soufi_assosi"] },
+      basfar: { title: "رادیو قرآن عبدالله بصفر", urls: ["https://qurango.net/radio/abdullah_basfer", "https://backup.qurango.net/radio/abdullah_basfer"] },
+      ghamdi: { title: "رادیو قرآن سعد الغامدی", urls: ["https://backup.qurango.net/radio/saad_alghamdi", "https://radio.qurango.net/radio/saad_alghamdi"] },
+      dosari: { title: "رادیو قرآن یاسر الدوسری", urls: ["https://backup.qurango.net/radio/yasser_aldosari", "https://radio.qurango.net/radio/yasser_aldosari"] },
+      sudais: { title: "رادیو قرآن عبدالرحمن السدیس", urls: ["https://qurango.net/radio/abdulrahman_alsudaes", "https://backup.qurango.net/radio/abdulrahman_alsudaes"] },
+      shuraim: { title: "رادیو قرآن سعود الشریم", urls: ["https://backup.qurango.net/radio/saud_alshuraim", "https://radio.qurango.net/radio/saud_alshuraim"] },
+      abkar: { title: "رادیو قرآن ادریس أبکر", urls: ["https://qurango.net/radio/idrees_abkr", "https://backup.qurango.net/radio/idrees_abkr"] },
+      ayyub: { title: "رادیو قرآن محمد ایوب", urls: ["https://qurango.net/radio/mohammed_ayyub", "https://backup.qurango.net/radio/mohammed_ayyub", "https://qurango.net/radio/ayyoub2"] }
+    };
+
+    const DEFAULTS = {
+      iqama: { Fajr: 15, Dhuhr: 10, Asr: 10, Maghrib: 5, Isha: 10 },
+      adhkarEnabled: true,
+      alertsEnabled: true,
+      hijriAdjustment: 0,
+      themeColor: "#0f766e",
+      backgroundColor: "#f2f5f3"
+    };
+
+    /* ---------- شمارهٔ صفحهٔ شروع هر سوره ---------- */
+    const SURAH_PAGES = {
+      1:1, 2:2, 3:50, 4:77, 5:106, 6:128, 7:151, 8:177, 9:187, 10:208,
+      11:221, 12:235, 13:249, 14:255, 15:262, 16:267, 17:282, 18:293, 19:305, 20:312,
+      21:322, 22:332, 23:342, 24:350, 25:359, 26:367, 27:377, 28:385, 29:396, 30:404,
+      31:411, 32:415, 33:418, 34:428, 35:434, 36:440, 37:446, 38:453, 39:458, 40:467,
+      41:477, 42:483, 43:489, 44:496, 45:499, 46:502, 47:507, 48:511, 49:515, 50:518,
+      51:520, 52:523, 53:526, 54:528, 55:531, 56:534, 57:537, 58:542, 59:545, 60:549,
+      61:551, 62:553, 63:554, 64:556, 65:558, 66:560, 67:562, 68:564, 69:566, 70:568,
+      71:570, 72:572, 73:574, 74:575, 75:577, 76:578, 77:580, 78:582, 79:583, 80:585,
+      81:586, 82:587, 83:587, 84:589, 85:590, 86:591, 87:591, 88:592, 89:593, 90:594,
+      91:595, 92:595, 93:596, 94:596, 95:597, 96:597, 97:598, 98:598, 99:599, 100:599,
+      101:600, 102:600, 103:601, 104:601, 105:601, 106:602, 107:602, 108:602, 109:603, 110:603,
+      111:603, 112:604, 113:604, 114:604
+    };
+
+    const SURAH_NAMES = [
+      "الفاتحة","البقرة","آل عمران","النساء","المائدة","الأنعام","الأعراف","الأنفال","التوبة","يونس",
+      "هود","يوسف","الرعد","إبراهيم","الحجر","النحل","الإسراء","الكهف","مريم","طه",
+      "الأنبياء","الحج","المؤمنون","النور","الفرقان","الشعراء","النمل","القصص","العنكبوت","الروم",
+      "لقمان","السجدة","الأحزاب","سبأ","فاطر","يس","الصافات","ص","الزمر","غافر",
+      "فصلت","الشورى","الزخرف","الدخان","الجاثية","الأحقاف","محمد","الفتح","الحجرات","ق",
+      "الذاريات","الطور","النجم","القمر","الرحمن","الواقعة","الحديد","المجادلة","الحشر","الممتحنة",
+      "الصف","الجمعة","المنافقون","التغابن","الطلاق","التحريم","الملك","القلم","الحاقة","المعارج",
+      "نوح","الجن","المزمل","المدثر","القيامة","الإنسان","المرسلات","النبأ","النازعات","عبس",
+      "التكوير","الإنفطار","المطففين","الإنشقاق","البروج","الطارق","الأعلى","الغاشية","الفجر","البلد",
+      "الشمس","الليل","الضحى","الشرح","التين","العلق","القدر","البينة","الزلزلة","العاديات",
+      "القارعة","التكاثر","العصر","الهمزة","الفيل","قريش","الماعون","الكوثر","الكافرون","النصر",
+      "المسد","الإخلاص","الفلق","الناس"
+    ];
+
+    /* ---------- منابع تصویر مصحف (به ترتیب اولویت) ----------
+       منبع اصلی: QuranHub — بدون صفر ابتدایی، مثل: 1.png، 2.png ... 604.png */
+    const MUSHAF_SOURCES = [
+      { name: "QuranHub · حفص", description: "منبع فعلی · صفحات مصحف", url: page => `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/ayat/hafs/${page}.png` },
+      { name: "myQuran CDN", description: "منبع جایگزین ۱ · تصویر صفحات", url: page => `https://cdn.myquran.com/img/page/${page}.png` },
+      { name: "Islam-DB · مصحف مدینه", description: "منبع جایگزین ۲ · تصویر صفحات", url: page => `https://quran.islam-db.com/data/pages/quranpages_1024/images/page${String(page).padStart(3, "0")}.png` },
+      { name: "مصحف مدینه · الله و رب قرمز", description: "منبع ۴ · لفظ جلاله، رب، رحمن و هو به رنگ قرمز", url: page => `https://iiif.archive.org/iiif/al-quran-with-allah-name-in-red-color-arabic%24${page + mushafRedOffset()}/full/1000,/0/default.jpg` }
+    ];
+    const MUSHAF_RED_OFFSET_KEY = "suza-mushaf-red-offset";
+    function mushafRedOffset() {
+      try { return Number(localStorage.getItem(MUSHAF_RED_OFFSET_KEY)) || 0; } catch { return 0; }
+    }
+    const MUSHAF_SOURCE_KEY = "suza-mushaf-source-index";
+    let selectedMushafSource = 0;
+
+    let settings = loadSettings();
+    let prayerData = null;
+    let deferredInstallPrompt = null;
+    let notifiedKeys = new Set();
+
+    function loadSettings() {
+      try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+        return { ...DEFAULTS, ...raw, iqama: { ...DEFAULTS.iqama, ...(raw.iqama || {}) } };
+      } catch {
+        return JSON.parse(JSON.stringify(DEFAULTS));
+      }
+    }
+    function saveSettings() { try { localStorage.setItem(STORAGE_KEY, JSON.stringify(settings)); } catch {} }
+    function byId(id) { return document.getElementById(id); }
+
+    function localDateParts(date = new Date()) {
+      const parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: TIME_ZONE, year: "numeric", month: "2-digit", day: "2-digit"
+      }).formatToParts(date);
+      const part = type => Number((parts.find(item => item.type === type) || {}).value || 0);
+      return { year: part("year"), month: part("month"), day: part("day") };
+    }
+    function localDateString(date = new Date()) {
+      const p = localDateParts(date);
+      return `${String(p.day).padStart(2, "0")}-${String(p.month).padStart(2, "0")}-${p.year}`;
+    }
+
+    function formatPersianDate(date, calendar = "persian") {
+      try {
+        const fmt = new Intl.DateTimeFormat("fa-IR-u-ca-" + calendar, {
+          timeZone: TIME_ZONE, weekday: "long", year: "numeric", month: "long", day: "numeric"
+        });
+        const parts = fmt.formatToParts(date);
+        const get = type => (parts.find(p => p.type === type) || {}).value || "";
+        const weekday = get("weekday");
+        const day = get("day");
+        const month = get("month");
+        const year = get("year");
+        if (weekday && day && month && year) return `${weekday} ${day} ${month} ${year}`;
+        return fmt.format(date);
+      } catch (e) {
+        console.warn("خطا در قالب تاریخ:", e);
+        try {
+          return new Intl.DateTimeFormat("fa-IR", {
+            timeZone: TIME_ZONE, weekday: "long", year: "numeric", month: "long", day: "numeric"
+          }).format(date);
+        } catch {
+          return date.toLocaleString();
+        }
+      }
+    }
+
+    function formatClock(date) {
+      try {
+        return new Intl.DateTimeFormat("fa-IR", {
+          timeZone: TIME_ZONE, hour: "2-digit", minute: "2-digit"
+        }).format(date);
+      } catch { return "--:--"; }
+    }
+    function fullDateTime(date) {
+      return formatPersianDate(date, "persian") + " ساعت " + formatClock(date);
+    }
+    function tehranTimeToDate(time, baseDate = new Date()) {
+      const clean = String(time || "").split(" ")[0];
+      const match = clean.match(/^(\d{1,2}):(\d{2})/);
+      if (!match) return null;
+      const { year, month, day } = localDateParts(baseDate);
+      const hour = Number(match[1]);
+      const minute = Number(match[2]);
+      return new Date(Date.UTC(year, month - 1, day, hour - 3, minute - 30));
+    }
+    function formatHM(minutes) {
+      if (!Number.isFinite(minutes)) return "—";
+      const sign = minutes < 0 ? "−" : "";
+      const total = Math.abs(Math.round(minutes));
+      const h = String(Math.floor(total / 60)).padStart(2, "0");
+      const m = String(total % 60).padStart(2, "0");
+      return `${sign}${h}:${m}`;
+    }
+
+    function loadDateHeader() {
+      try {
+        const now = new Date();
+        const adjustment = Number(settings.hijriAdjustment || 0);
+        const shifted = new Date(now.getTime() + adjustment * 86400000);
+        const persian = formatPersianDate(now, "persian");
+        let hijri = "";
+        try {
+          const hijriParts = new Intl.DateTimeFormat("fa-IR-u-ca-islamic-umalqura", {
+            timeZone: TIME_ZONE, year: "numeric", month: "long", day: "numeric"
+          }).format(shifted);
+          hijri = hijriParts;
+        } catch { hijri = ""; }
+        const line = hijri ? `${persian} · ${hijri}` : persian;
+        const el = byId("todayLine");
+        if (el) el.textContent = line;
+      } catch (e) {
+        console.error("خطا در نمایش تاریخ:", e);
+        const el = byId("todayLine");
+        if (el) el.textContent = new Date().toLocaleString("fa-IR");
+      }
+    }
+
+    async function loadPrayerTimes() {
+      const date = localDateString();
+      const url = new URL(`https://api.aladhan.com/v1/timings/${date}`);
+      url.searchParams.set("latitude", LATITUDE);
+      url.searchParams.set("longitude", LONGITUDE);
+      url.searchParams.set("method", "4");
+      url.searchParams.set("school", "0");
+      url.searchParams.set("timezonestring", TIME_ZONE);
+      const statusEl = byId("prayerStatus");
+      if (statusEl) statusEl.textContent = "در حال دریافت اوقات نماز…";
+      try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const json = await response.json();
+        if (json.code !== 200 || !json.data?.timings) throw new Error("پاسخ نامعتبر");
+        prayerData = json.data;
+        renderPrayerTimes();
+        loadTomorrowFajr();
+        if (statusEl) statusEl.textContent = "✓ اوقات امروز به‌روزرسانی شد.";
+      } catch (error) {
+        console.error(error);
+        if (statusEl) statusEl.textContent = "دریافت اوقات نماز ناموفق بود؛ اتصال اینترنت را بررسی کنید.";
+      }
+    }
+
+    async function loadTomorrowFajr() {
+      try {
+        const url = new URL(`https://api.aladhan.com/v1/timings/${localDateString(new Date(Date.now() + 86400000))}`);
+        url.searchParams.set("latitude", LATITUDE);
+        url.searchParams.set("longitude", LONGITUDE);
+        url.searchParams.set("method", "4");
+        url.searchParams.set("school", "0");
+        url.searchParams.set("timezonestring", TIME_ZONE);
+        const r = await fetch(url);
+        if (!r.ok) return;
+        const j = await r.json();
+        const f = j && j.data && j.data.timings && j.data.timings.Fajr;
+        if (f && prayerData) { prayerData.tomorrowFajr = f; updateCountdown(); }
+      } catch (e) { console.warn("tomorrow fajr:", e); }
+    }
+
+    function renderPrayerTimes() {
+      if (!prayerData) return;
+      const grid = byId("prayerGrid");
+      if (!grid) return;
+      const now = new Date();
+      const upcoming = PRAYERS.map(p => {
+        const time = tehranTimeToDate(prayerData.timings[p.key], now);
+        return time ? { ...p, iqama: new Date(time.getTime() + Number(settings.iqama[p.key] || 0) * 60000) } : null;
+      }).filter(Boolean);
+      const next = upcoming.find(p => p.iqama > now);
+
+      let sunriseHtml = "";
+      if (prayerData.timings.Sunrise) {
+        const srTime = tehranTimeToDate(prayerData.timings.Sunrise, now);
+        sunriseHtml = `
+          <article class="prayer" style="--c1:#f59e0b;--c2:#fcd34d">
+            <div class="p-icon">${ICONS.sunrise}</div>
+            <div class="label">طلوع خورشید</div>
+            <div class="value">${srTime ? formatClock(srTime) : "—"}</div>
+          </article>`;
+      }
+      let html = "";
+      html += PRAYERS.map(prayer => {
+        const time = tehranTimeToDate(prayerData.timings[prayer.key], now);
+        const iqama = time ? new Date(time.getTime() + Number(settings.iqama[prayer.key] || 0) * 60000) : null;
+        const isNext = next && next.key === prayer.key;
+        return `
+          <article class="prayer ${isNext ? "next" : ""}" style="--c1:${prayer.c1};--c2:${prayer.c2}">
+            <div class="p-icon">${ICONS[prayer.icon]}</div>
+            <div class="label">${prayer.name}</div>
+            <div class="value">${time ? formatClock(time) : "—"}</div>
+            <div class="subvalue">اقامه: ${iqama ? formatClock(iqama) : "—"}</div>
+          </article>`;
+      }).join("");
+      if (sunriseHtml) {
+        const firstCardEnd = html.indexOf("</article>") + "</article>".length;
+        html = firstCardEnd > "</article>".length - 1
+          ? html.slice(0, firstCardEnd) + sunriseHtml + html.slice(firstCardEnd)
+          : sunriseHtml + html;
+      }
+
+      grid.innerHTML = html;
+
+      const np = byId("nextPrayerName");
+      if (np && next) np.textContent = `اقامهٔ ${next.name} · ${formatClock(next.iqama)}`;
+    }
+
+    function renderIqamaSettings() {
+      const el = byId("iqamaSettings");
+      if (!el) return;
+      el.innerHTML = PRAYERS.map(p => `
+        <label class="setting">
+          تأخیر اقامهٔ ${p.name} (دقیقه)
+          <input type="number" min="0" max="120" step="1"
+            data-iqama="${p.key}" value="${Number(settings.iqama[p.key] || 0)}">
+        </label>`).join("");
+      document.querySelectorAll("[data-iqama]").forEach(input => {
+        input.addEventListener("change", () => {
+          settings.iqama[input.dataset.iqama] = Math.max(0, Number(input.value) || 0);
+          saveSettings();
+          renderPrayerTimes();
+        });
+      });
+    }
+
+    function renderSettings() {
+      renderIqamaSettings();
+      const a = byId("adhkarEnabled"); if (a) a.checked = !!settings.adhkarEnabled;
+      const b = byId("alertsEnabled"); if (b) b.checked = !!settings.alertsEnabled;
+      const h = byId("hijriAdjustment"); if (h) h.value = Number(settings.hijriAdjustment || 0);
+      const t = byId("themeColor"); if (t) t.value = settings.themeColor;
+      const bg = byId("backgroundColor"); if (bg) bg.value = settings.backgroundColor;
+      applyTheme();
+    }
+
+    function applyTheme() {
+      try {
+        document.documentElement.style.setProperty("--primary", settings.themeColor);
+        document.documentElement.style.setProperty("--background", settings.backgroundColor);
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.setAttribute("content", settings.themeColor);
+      } catch (e) { console.warn(e); }
+    }
+
+    function countdownText(target, now) {
+      const seconds = Math.max(0, Math.floor((target - now) / 1000));
+      const hours = String(Math.floor(seconds / 3600)).padStart(2, "0");
+      const minutes = String(Math.floor((seconds % 3600) / 60)).padStart(2, "0");
+      const remain = String(seconds % 60).padStart(2, "0");
+      return `${hours}:${minutes}:${remain}`;
+    }
+
+    function updateCountdown() {
+      if (!prayerData) return;
+      const now = new Date();
+      const schedule = PRAYERS.map(p => {
+        const adhan = tehranTimeToDate(prayerData.timings[p.key], now);
+        return adhan ? { ...p, adhan, iqama: new Date(adhan.getTime() + Number(settings.iqama[p.key] || 0) * 60000) } : null;
+      }).filter(Boolean);
+      let upcomingAdhan = schedule.find(p => p.adhan > now);
+      let upcomingIqama = schedule.find(p => p.iqama > now);
+      if (!upcomingAdhan || !upcomingIqama) {
+        const raw = prayerData.tomorrowFajr || prayerData.timings.Fajr;
+        const adhanT = tehranTimeToDate(raw, new Date(now.getTime() + 86400000));
+        if (adhanT) {
+          const tm = { ...PRAYERS[0], name: "فجر فردا", adhan: adhanT, iqama: new Date(adhanT.getTime() + Number(settings.iqama.Fajr || 0) * 60000) };
+          if (!upcomingAdhan) upcomingAdhan = tm;
+          if (!upcomingIqama) upcomingIqama = tm;
+        }
+      }
+
+      const adhanName = byId("nextAdhanName");
+      const adhanCd = byId("adhanCountdown");
+      const prayerName = byId("nextPrayerName");
+      const cd = byId("countdown");
+
+      if (upcomingAdhan) {
+        if (adhanName) adhanName.textContent = `تا اذان ${upcomingAdhan.name} · ${formatClock(upcomingAdhan.adhan)}`;
+        if (adhanCd) adhanCd.textContent = countdownText(upcomingAdhan.adhan, now);
+      } else {
+        if (adhanName) adhanName.textContent = "اذان‌های امروز به پایان رسیده‌اند";
+        if (adhanCd) adhanCd.textContent = "--:--:--";
+      }
+
+      if (!upcomingIqama) {
+        if (prayerName) prayerName.textContent = "اقامه‌های امروز به پایان رسیده‌اند";
+        if (cd) cd.textContent = "--:--:--";
+        return;
+      }
+      if (prayerName) prayerName.textContent = `تا اقامهٔ ${upcomingIqama.name} · ${formatClock(upcomingIqama.iqama)}`;
+      if (cd) cd.textContent = countdownText(upcomingIqama.iqama, now);
+      checkReminders(now, upcomingIqama);
+    }
+
+    function sendNotification(title, body, key) {
+      if (notifiedKeys.has(key)) return;
+      notifiedKeys.add(key);
+      if ("Notification" in window && Notification.permission === "granted") {
+        try { new Notification(title, { body, icon: "./icon-192.png" }); } catch {}
+      } else {
+        alert(`${title}\n${body}`);
+      }
+    }
+
+    function checkReminders(now, upcoming) {
+      const today = localDateString(now);
+      if (settings.alertsEnabled && upcoming) {
+        const alertAt = new Date(upcoming.iqama.getTime() - 10 * 60000);
+        const key = `iqama-${today}-${upcoming.key}`;
+        if (now >= alertAt && now < upcoming.iqama && !notifiedKeys.has(key)) {
+          sendNotification("یادآوری اقامه", `۱۰ دقیقه تا اقامهٔ ${upcoming.name} باقی مانده است.`, key);
+        }
+      }
+      if (settings.adhkarEnabled && prayerData?.timings?.Maghrib) {
+        const maghrib = tehranTimeToDate(prayerData.timings.Maghrib, now);
+        if (maghrib) {
+          const reminderAt = new Date(maghrib.getTime() - 30 * 60000);
+          const key = `adhkar-${today}`;
+          if (now >= reminderAt && now < maghrib && !notifiedKeys.has(key)) {
+            sendNotification("یادآوری اذکار", "۳۰ دقیقه تا مغرب باقی مانده است.", key);
+          }
+        }
+      }
+    }
+
+    function setupNavigation() {
+      const panels = ["homePanel", "mushafPanel", "moonPanel", "radioPanel", "settingsPanel", "adhkarPanel"];
+      document.querySelectorAll("[data-open]").forEach(button => {
+        button.addEventListener("click", () => {
+          const target = button.dataset.open;
+          panels.forEach(id => {
+            const el = byId(id);
+            if (el) el.classList.toggle("hidden", id !== target);
+          });
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    }
+
+    let mushafPage = 1;
+    let touchStartX = 0, touchStartY = 0, touchMoved = false;
+
+    const mushafCache = new Map();     // page -> { url, idx } (loaded OK)
+    const mushafPreloads = new Map();  // page -> Image kept alive while near
+    let mushafLoadTimer = null;
+    let mushafGoodSource = null;
+
+    function preloadMushafPages(center) {
+      const idx = mushafGoodSource != null ? mushafGoodSource : selectedMushafSource;
+      [1, -1, 2, -2, 3, -3].forEach(off => {
+        const p = center + off;
+        if (p < 1 || p > 604 || mushafCache.has(p) || mushafPreloads.has(p)) return;
+        const img = new Image();
+        img.decoding = "async";
+        img.onload = () => { mushafCache.set(p, { url: img.src, idx }); };
+        img.onerror = () => { mushafPreloads.delete(p); };
+        img.src = MUSHAF_SOURCES[idx].url(p);
+        mushafPreloads.set(p, img);
+      });
+      for (const key of Array.from(mushafPreloads.keys())) {
+        if (Math.abs(key - center) > 8) { mushafPreloads.delete(key); mushafCache.delete(key); }
+      }
+    }
+
+    function showMushafPage(page) {
+      const next = Math.max(1, Math.min(604, Math.trunc(Number(page) || 1)));
+      mushafPage = next;
+      updateFsBar();
+      const image = byId("mushafImage");
+      const statusEl = byId("mushafStatus");
+      if (!image) return;
+      clearTimeout(mushafLoadTimer);
+      image.alt = `صفحهٔ ${next} مصحف شریف، روایت حفص`;
+      const order = [selectedMushafSource, ...MUSHAF_SOURCES.map((_, i) => i).filter(i => i !== selectedMushafSource)];
+      const cached = mushafCache.get(next);
+      let attempt = 0;
+      let currentIdx = selectedMushafSource;
+
+      function finish() {
+        clearTimeout(mushafLoadTimer);
+        if (mushafPage !== next) return;
+        mushafGoodSource = currentIdx;
+        mushafCache.set(next, { url: image.src, idx: currentIdx });
+        if (statusEl) statusEl.textContent = `صفحهٔ ${next} از ۶۰۴ · روایت حفص`;
+        if (fullscreenImage) { fullscreenImage.src = image.src; fullscreenImage.alt = image.alt; }
+        applyMushafCrop();
+        setTimeout(() => { if (mushafPage === next) preloadMushafPages(next); }, 60);
+      }
+      function tryLoad() {
+        clearTimeout(mushafLoadTimer);
+        if (attempt >= order.length) {
+          if (statusEl) statusEl.textContent = `بارگذاری صفحهٔ ${next} ناموفق بود. اتصال اینترنت را بررسی کنید.`;
+          return;
+        }
+        currentIdx = order[attempt];
+        const url = (attempt === 0 && cached) ? cached.url : MUSHAF_SOURCES[currentIdx].url(next);
+        if (statusEl && !(attempt === 0 && cached)) {
+          statusEl.textContent = attempt === 0 ? `در حال بارگذاری صفحهٔ ${next}…` : `منبع انتخابی کند یا در دسترس نبود؛ تلاش با ${MUSHAF_SOURCES[currentIdx].name}…`;
+        }
+        if (image.src === url && image.complete && image.naturalWidth) { finish(); return; }
+        image.src = url;
+        mushafLoadTimer = setTimeout(() => {
+          if (mushafPage === next && !(image.complete && image.naturalWidth && image.src === url)) { attempt += 1; tryLoad(); }
+        }, 10000);
+      }
+      image.onerror = () => { attempt += 1; tryLoad(); };
+      image.onload = finish;
+      tryLoad();
+      try { localStorage.setItem("suza-mushaf-last-page", String(next)); } catch {}
+    }
+
+    /* ---------- جهت جابجایی: کشیدن به راست => صفحهٔ بعد، به چپ => صفحهٔ قبل ---------- */
+    function setupMushafSwipe() {
+      const wrap = byId("mushafPageWrap");
+      if (!wrap) return;
+      wrap.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+        touchMoved = false;
+      }, { passive: true });
+      wrap.addEventListener("touchmove", (e) => {
+        if (e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - touchStartX;
+        const dy = e.touches[0].clientY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) touchMoved = true;
+      }, { passive: true });
+      wrap.addEventListener("touchend", (e) => {
+        if (!touchMoved) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+          if (dx > 0) showMushafPage(mushafPage + 1);
+          else showMushafPage(mushafPage - 1);
+        }
+        touchMoved = false;
+      }, { passive: true });
+    }
+
+    function renderSurahList() {
+      const list = byId("surahList");
+      if (!list) return;
+      list.innerHTML = SURAH_NAMES.map((name, i) => {
+        const num = i + 1;
+        const page = SURAH_PAGES[num] || 1;
+        return `<div class="surah-card" data-page="${page}">
+          <span class="surah-num">${num}</span>
+          <div><div class="surah-name">سورهٔ ${name}</div><div class="surah-meta">صفحهٔ ${page}</div></div>
+        </div>`;
+      }).join("");
+      list.querySelectorAll(".surah-card").forEach(card => {
+        card.addEventListener("click", () => {
+          showMushafPage(Number(card.dataset.page));
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        });
+      });
+    }
+
+    /* ============ نمای تمام‌صفحهٔ واقعی + خروج با دو ضربه ============ */
+    let fullscreenWrap = null;
+    let fullscreenImage = null;
+    let fullscreenFrame = null;
+    let lastTapTime = 0;
+    let tapTimer = null;
+
+    function openFullscreen() {
+      if (fullscreenWrap) return;
+      const mainImg = byId("mushafImage");
+      if (!mainImg || !mainImg.src) return;
+
+      fullscreenWrap = document.createElement("div");
+      fullscreenWrap.className = "mushaf-fullscreen";
+
+      fullscreenImage = document.createElement("img");
+      fullscreenImage.src = mainImg.src;
+      fullscreenImage.alt = mainImg.alt;
+      fullscreenFrame = document.createElement("div");
+      fullscreenFrame.className = "crop-frame";
+      fullscreenFrame.appendChild(fullscreenImage);
+      fullscreenWrap.appendChild(fullscreenFrame);
+
+      fullscreenBar = document.createElement("div");
+      fullscreenBar.className = "fs-bar";
+      fullscreenBar.innerHTML = '<span class="fs-juz"></span><span class="fs-page"></span><span class="fs-surah"></span>';
+      fullscreenWrap.appendChild(fullscreenBar);
+      updateFsBar();
+
+      function handleDoubleTap(e) {
+        const now = Date.now();
+        if (now - lastTapTime < 320) {
+          if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
+          lastTapTime = 0;
+          e.preventDefault();
+          e.stopPropagation();
+          closeFullscreen();
+          return;
+        }
+        lastTapTime = now;
+        if (e.cancelable) e.preventDefault();
+        if (tapTimer) clearTimeout(tapTimer);
+        tapTimer = setTimeout(() => { lastTapTime = 0; tapTimer = null; toggleFsBar(); }, 320);
+      }
+
+      let fsTouchX = 0, fsTouchY = 0, fsMoved = false;
+
+      fullscreenWrap.addEventListener("touchstart", (e) => {
+        if (e.touches.length !== 1) return;
+        fsTouchX = e.touches[0].clientX;
+        fsTouchY = e.touches[0].clientY;
+        fsMoved = false;
+      }, { passive: true });
+      fullscreenWrap.addEventListener("touchmove", (e) => {
+        if (e.touches.length !== 1) return;
+        const dx = e.touches[0].clientX - fsTouchX;
+        const dy = e.touches[0].clientY - fsTouchY;
+        if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 20) fsMoved = true;
+      }, { passive: true });
+      fullscreenWrap.addEventListener("touchend", (e) => {
+        if (e.changedTouches && e.changedTouches.length === 1) {
+          if (fsMoved) {
+            const dx = e.changedTouches[0].clientX - fsTouchX;
+            const dy = e.changedTouches[0].clientY - fsTouchY;
+            if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 50) {
+              if (dx > 0) showMushafPage(mushafPage + 1);
+              else showMushafPage(mushafPage - 1);
+            }
+            fsMoved = false;
+          } else {
+            handleDoubleTap(e);
+          }
+        }
+      }, { passive: false });
+
+      fullscreenWrap.addEventListener("click", handleDoubleTap);
+      fullscreenWrap.addEventListener("dblclick", (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        closeFullscreen();
+      });
+
+      document.body.appendChild(fullscreenWrap);
+      fullscreenImage.addEventListener("load", applyMushafCrop);
+      applyMushafCrop();
+
+      const el = document.documentElement;
+      if (el.requestFullscreen) {
+        el.requestFullscreen().catch(() => {});
+      } else if (el.webkitRequestFullscreen) {
+        el.webkitRequestFullscreen();
+      } else if (el.msRequestFullscreen) {
+        el.msRequestFullscreen();
+      }
+    }
+
+    function closeFullscreen() {
+      if (fullscreenWrap && fullscreenWrap.parentNode) {
+        fullscreenWrap.parentNode.removeChild(fullscreenWrap);
+      }
+      fullscreenWrap = null;
+      fullscreenImage = null;
+      fullscreenFrame = null;
+      fullscreenBar = null;
+      lastTapTime = 0;
+      if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      } else if (document.webkitFullscreenElement && document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msFullscreenElement && document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+
+    function setupFullscreen() {
+      const btn = byId("mushafFullscreenBtn");
+      if (btn) btn.addEventListener("click", openFullscreen);
+      document.addEventListener("fullscreenchange", () => {
+        if (!document.fullscreenElement && fullscreenWrap) closeFullscreen();
+      });
+      document.addEventListener("webkitfullscreenchange", () => {
+        if (!document.webkitFullscreenElement && fullscreenWrap) closeFullscreen();
+      });
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Escape" && fullscreenWrap) closeFullscreen();
+      });
+    }
+
+    function renderMushafSources() {
+      const picker = byId("mushafSourcePicker");
+      if (!picker) return;
+      picker.innerHTML = MUSHAF_SOURCES.map((source, index) => `<div class="source-card ${index === selectedMushafSource ? "selected" : ""}" data-source="${index}"><img loading="lazy" data-preview-source="${index}" src="${source.url(mushafPage || 1)}" alt="پیش‌نمایش ${source.name}"><strong>${source.name}</strong><div class="surah-meta">${source.description}</div><div class="surah-meta preview-status" aria-live="polite">در حال بارگذاری پیش‌نمایش…</div><button type="button" class="${index === selectedMushafSource ? "" : "secondary"}" style="margin-top:8px;padding:8px 10px">${index === selectedMushafSource ? "✓ انتخاب‌شده" : "انتخاب منبع"}</button></div>`).join("");
+      picker.querySelectorAll("img[data-preview-source]").forEach(img => {
+        const card = img.closest(".source-card");
+        const status = card.querySelector(".preview-status");
+        img.onload = () => { if (status) status.textContent = "پیش‌نمایش آماده است"; };
+        img.onerror = () => { img.style.display = "none"; if (status) status.textContent = "پیش‌نمایش این منبع در دسترس نیست"; };
+      });
+      picker.querySelectorAll("[data-source]").forEach(card => card.querySelector("button").addEventListener("click", () => {
+        selectedMushafSource = Number(card.dataset.source);
+        try { localStorage.setItem(MUSHAF_SOURCE_KEY, String(selectedMushafSource)); } catch {}
+        renderMushafSources();
+        updateRedOffsetUi();
+        applyMushafCrop();
+        showMushafPage(mushafPage);
+      }));
+    }
+
+    const JUZ_STARTS = [1,22,42,62,82,102,122,142,162,182,202,222,242,262,282,302,322,342,362,382,402,422,442,462,482,502,522,542,562,582];
+    const JUZ_ORDINALS = ["الأول","الثاني","الثالث","الرابع","الخامس","السادس","السابع","الثامن","التاسع","العاشر","الحادي عشر","الثاني عشر","الثالث عشر","الرابع عشر","الخامس عشر","السادس عشر","السابع عشر","الثامن عشر","التاسع عشر","العشرون","الحادي والعشرون","الثاني والعشرون","الثالث والعشرون","الرابع والعشرون","الخامس والعشرون","السادس والعشرون","السابع والعشرون","الثامن والعشرون","التاسع والعشرون","الثلاثون"];
+    function mushafPageInfo(page) {
+      let juz = 1;
+      JUZ_STARTS.forEach((start, i) => { if (page >= start) juz = i + 1; });
+      let surah = 1;
+      for (let n = 1; n <= 114; n++) { if ((SURAH_PAGES[n] || 1) <= page) surah = n; else break; }
+      return { juz: "الجزء " + JUZ_ORDINALS[juz - 1], surah: "سورة " + SURAH_NAMES[surah - 1] };
+    }
+    let fullscreenBar = null;
+    function updateFsBar() {
+      if (!fullscreenBar) return;
+      const info = mushafPageInfo(mushafPage);
+      fullscreenBar.querySelector(".fs-juz").textContent = info.juz;
+      fullscreenBar.querySelector(".fs-page").textContent = String(mushafPage);
+      fullscreenBar.querySelector(".fs-surah").textContent = info.surah;
+    }
+    function toggleFsBar() {
+      if (fullscreenBar) fullscreenBar.classList.toggle("show");
+    }
+    const RED_SOURCE_INDEX = 3;
+    const MUSHAF_CROP_KEY = "suza-mushaf-crop";
+    function mushafCropOn() {
+      try { return localStorage.getItem(MUSHAF_CROP_KEY) !== "0"; } catch { return true; }
+    }
+    const CROP = { L: .152, R: .148, T: .108, B: .099 };
+    // pages 1 and 2 (Al-Fatiha / start of Al-Baqarah) have a different, fully decorated layout: never cropped
+    function mushafCropActive() {
+      return selectedMushafSource === RED_SOURCE_INDEX && mushafCropOn() && mushafPage > 2;
+    }
+    function cropFrameFor(img, frame) {
+      if (!frame) return;
+      const on = mushafCropActive();
+      frame.classList.toggle("on", on);
+      if (on && img && img.naturalWidth && img.naturalHeight) {
+        const ar = (img.naturalWidth / img.naturalHeight) * (1 - CROP.L - CROP.R) / (1 - CROP.T - CROP.B);
+        frame.style.setProperty("--ar", ar.toFixed(4));
+      }
+    }
+    function applyMushafCrop() {
+      const on = mushafCropActive();
+      cropFrameFor(byId("mushafImage"), byId("mushafFrame"));
+      const wrap = byId("mushafPageWrap");
+      if (wrap) wrap.classList.toggle("cropped", on);
+      if (fullscreenImage) cropFrameFor(fullscreenImage, fullscreenFrame);
+      if (fullscreenWrap) fullscreenWrap.classList.toggle("cropped", on);
+      const btn = byId("mushafCropBtn");
+      if (btn) {
+        btn.classList.toggle("hidden", selectedMushafSource !== RED_SOURCE_INDEX);
+        btn.textContent = mushafCropOn() ? "حذف حاشیه: روشن" : "حذف حاشیه: خاموش";
+        btn.setAttribute("aria-pressed", String(mushafCropOn()));
+      }
+    }
+
+    function updateRedOffsetUi() {
+      const row = byId("redOffsetRow");
+      if (row) row.classList.toggle("hidden", selectedMushafSource !== RED_SOURCE_INDEX);
+      const v = byId("redOffsetValue");
+      if (v) v.textContent = String(mushafRedOffset());
+    }
+    function setupRedOffset() {
+      const change = delta => {
+        try { localStorage.setItem(MUSHAF_RED_OFFSET_KEY, String(mushafRedOffset() + delta)); } catch {}
+        mushafCache.clear();
+        mushafPreloads.clear();
+        updateRedOffsetUi();
+        showMushafPage(mushafPage);
+      };
+      const m = byId("redOffsetMinus"), p = byId("redOffsetPlus");
+      if (m) m.addEventListener("click", () => change(-1));
+      if (p) p.addEventListener("click", () => change(1));
+      updateRedOffsetUi();
+      const cb = byId("mushafCropBtn");
+      if (cb) cb.addEventListener("click", () => {
+        try { localStorage.setItem(MUSHAF_CROP_KEY, mushafCropOn() ? "0" : "1"); } catch {}
+        applyMushafCrop();
+      });
+      applyMushafCrop();
+    }
+
+    function setupMushaf() {
+      let saved = 1;
+      try { saved = Number(localStorage.getItem("suza-mushaf-last-page")) || 1; } catch {}
+      try { selectedMushafSource = Math.max(0, Math.min(MUSHAF_SOURCES.length - 1, Number(localStorage.getItem(MUSHAF_SOURCE_KEY)) || 0)); } catch { selectedMushafSource = 0; }
+      renderMushafSources();
+      showMushafPage(saved);
+      setupMushafSwipe();
+      setupRedOffset();
+      renderSurahList();
+      setupFullscreen();
+    }
+
+    const ADHKAR_MORNING = [
+      ["أَصْبَحْنَا وَأَصْبَحَ الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ", "یک بار"],
+      ["اللَّهُمَّ بِكَ أَصْبَحْنَا، وَبِكَ أَمْسَيْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ النُّشُورُ", "یک بار"],
+      ["رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا", "۳ بار"],
+      ["اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ", "یک بار · سیدالاستغفار"],
+      ["اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ", "یک بار"],
+      ["بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ", "۳ بار"],
+      ["حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ", "۷ بار"],
+      ["اللَّهُمَّ عَافِنِي فِي بَدَنِي، اللَّهُمَّ عَافِنِي فِي سَمْعِي، اللَّهُمَّ عَافِنِي فِي بَصَرِي، لَا إِلَهَ إِلَّا أَنْتَ", "۳ بار"],
+      ["اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْكُفْرِ وَالْفَقْرِ، وَأَعُوذُ بِكَ مِنْ عَذَابِ الْقَبْرِ، لَا إِلَهَ إِلَّا أَنْتَ", "۳ بار"],
+      ["سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", "۱۰۰ بار"],
+      ["لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ", "۱۰ بار یا بیشتر"],
+      ["قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ", "۳ بار · سوره اخلاص"],
+      ["قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ", "۳ بار · سوره فلق"],
+      ["قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ", "۳ بار · سوره ناس"],
+      ["اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ", "یک بار · آیه‌الکرسی"],
+      ["اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ", "۱۰ بار یا بیشتر"]
+    ];
+    const ADHKAR_EVENING = [
+      ["أَمْسَيْنَا وَأَمْسَى الْمُلْكُ لِلَّهِ، وَالْحَمْدُ لِلَّهِ، لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ", "یک بار"],
+      ["اللَّهُمَّ بِكَ أَمْسَيْنَا، وَبِكَ أَصْبَحْنَا، وَبِكَ نَحْيَا، وَبِكَ نَمُوتُ، وَإِلَيْكَ الْمَصِيرُ", "یک بار"],
+      ["رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ ﷺ نَبِيًّا", "۳ بار"],
+      ["أَعُوذُ بِكَلِمَاتِ اللَّهِ التَّامَّاتِ مِنْ شَرِّ مَا خَلَقَ", "۳ بار"],
+      ["بِسْمِ اللَّهِ الَّذِي لَا يَضُرُّ مَعَ اسْمِهِ شَيْءٌ فِي الْأَرْضِ وَلَا فِي السَّمَاءِ وَهُوَ السَّمِيعُ الْعَلِيمُ", "۳ بار"],
+      ["اللَّهُمَّ إِنِّي أَسْأَلُكَ الْعَفْوَ وَالْعَافِيَةَ فِي الدُّنْيَا وَالْآخِرَةِ", "یک بار"],
+      ["اللَّهُمَّ أَنْتَ رَبِّي لَا إِلَهَ إِلَّا أَنْتَ، خَلَقْتَنِي وَأَنَا عَبْدُكَ، وَأَنَا عَلَى عَهْدِكَ وَوَعْدِكَ مَا اسْتَطَعْتُ، أَعُوذُ بِكَ مِنْ شَرِّ مَا صَنَعْتُ، أَبُوءُ لَكَ بِنِعْمَتِكَ عَلَيَّ، وَأَبُوءُ بِذَنْبِي فَاغْفِرْ لِي، فَإِنَّهُ لَا يَغْفِرُ الذُّنُوبَ إِلَّا أَنْتَ", "یک بار · سیدالاستغفار"],
+      ["حَسْبِيَ اللَّهُ لَا إِلَهَ إِلَّا هُوَ عَلَيْهِ تَوَكَّلْتُ وَهُوَ رَبُّ الْعَرْشِ الْعَظِيمِ", "۷ بار"],
+      ["اللَّهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْهَمِّ وَالْحَزَنِ، وَأَعُوذُ بِكَ مِنَ الْعَجْزِ وَالْكَسَلِ، وَأَعُوذُ بِكَ مِنَ الْجُبْنِ وَالْبُخْلِ، وَأَعُوذُ بِكَ مِنْ غَلَبَةِ الدَّيْنِ وَقَهْرِ الرِّجَالِ", "یک بار"],
+      ["سُبْحَانَ اللَّهِ وَبِحَمْدِهِ", "۱۰۰ بار"],
+      ["لَا إِلَهَ إِلَّا اللَّهُ وَحْدَهُ لَا شَرِيكَ لَهُ، لَهُ الْمُلْكُ وَلَهُ الْحَمْدُ وَهُوَ عَلَى كُلِّ شَيْءٍ قَدِيرٌ", "۱۰ بار یا بیشتر"],
+      ["قُلْ هُوَ اللَّهُ أَحَدٌ ۝ اللَّهُ الصَّمَدُ ۝ لَمْ يَلِدْ وَلَمْ يُولَدْ ۝ وَلَمْ يَكُنْ لَهُ كُفُوًا أَحَدٌ", "۳ بار · سوره اخلاص"],
+      ["قُلْ أَعُوذُ بِرَبِّ الْفَلَقِ ۝ مِنْ شَرِّ مَا خَلَقَ ۝ وَمِنْ شَرِّ غَاسِقٍ إِذَا وَقَبَ ۝ وَمِنْ شَرِّ النَّفَّاثَاتِ فِي الْعُقَدِ ۝ وَمِنْ شَرِّ حَاسِدٍ إِذَا حَسَدَ", "۳ بار · سوره فلق"],
+      ["قُلْ أَعُوذُ بِرَبِّ النَّاسِ ۝ مَلِكِ النَّاسِ ۝ إِلَهِ النَّاسِ ۝ مِنْ شَرِّ الْوَسْوَاسِ الْخَنَّاسِ ۝ الَّذِي يُوَسْوِسُ فِي صُدُورِ النَّاسِ ۝ مِنَ الْجِنَّةِ وَالنَّاسِ", "۳ بار · سوره ناس"],
+      ["اللَّهُ لَا إِلَهَ إِلَّا هُوَ الْحَيُّ الْقَيُّومُ ۚ لَا تَأْخُذُهُ سِنَةٌ وَلَا نَوْمٌ ۚ لَهُ مَا فِي السَّمَاوَاتِ وَمَا فِي الْأَرْضِ ۗ مَنْ ذَا الَّذِي يَشْفَعُ عِنْدَهُ إِلَّا بِإِذْنِهِ ۚ يَعْلَمُ مَا بَيْنَ أَيْدِيهِمْ وَمَا خَلْفَهُمْ ۖ وَلَا يُحِيطُونَ بِشَيْءٍ مِنْ عِلْمِهِ إِلَّا بِمَا شَاءَ ۚ وَسِعَ كُرْسِيُّهُ السَّمَاوَاتِ وَالْأَرْضَ ۖ وَلَا يَئُودُهُ حِفْظُهُمَا ۚ وَهُوَ الْعَلِيُّ الْعَظِيمُ", "یک بار · آیه‌الکرسی"],
+      ["اللَّهُمَّ صَلِّ وَسَلِّمْ عَلَى نَبِيِّنَا مُحَمَّدٍ", "۱۰ بار یا بیشتر"]
+    ];
+    function renderDhikrList(id, items) {
+      const el = byId(id); if (!el) return;
+      el.innerHTML = items.map(([text, count], i) => `<article class="dhikr-item"><div class="dhikr-text" dir="rtl">${text}</div><div class="dhikr-meta"><span>ذکر ${i + 1}</span><strong>تعداد پیشنهادی: ${count}</strong><button type="button" class="secondary" data-copy-dhikr="${i}" style="padding:7px 10px">کپی ذکر</button></div></article>`).join("");
+      el.querySelectorAll("[data-copy-dhikr]").forEach(btn => btn.addEventListener("click", async () => {
+        const text = items[Number(btn.dataset.copyDhikr)][0];
+        try { await navigator.clipboard.writeText(text); btn.textContent = "کپی شد ✓"; } catch { btn.textContent = text; }
+      }));
+    }
+    let tasbihCount = 0;
+    function updateTasbih() {
+      const countEl = byId("tasbihCount"), status = byId("tasbihStatus"), phrase = byId("tasbihPhrase"), target = Number(byId("tasbihTarget")?.value || 0);
+      if (countEl) countEl.textContent = new Intl.NumberFormat("fa-IR").format(tasbihCount);
+      if (byId("tasbihPhrasePreview") && phrase) byId("tasbihPhrasePreview").textContent = phrase.value;
+      if (status) status.textContent = target && tasbihCount >= target ? `الحمدلله! هدف ${new Intl.NumberFormat("fa-IR").format(target)} ذکر تکمیل شد.` : target ? `${new Intl.NumberFormat("fa-IR").format(tasbihCount)} از ${new Intl.NumberFormat("fa-IR").format(target)} ذکر` : "شمارش بدون هدف";
+      try { localStorage.setItem("suza-tasbih", JSON.stringify({ count: tasbihCount, phrase: phrase?.value || "سُبْحَانَ اللَّهِ", target: byId("tasbihTarget")?.value || "100" })); } catch {}
+    }
+    function setupAdhkar() {
+      renderDhikrList("morningAdhkar", ADHKAR_MORNING); renderDhikrList("eveningAdhkar", ADHKAR_EVENING);
+      try { const saved = JSON.parse(localStorage.getItem("suza-tasbih") || "{}"); tasbihCount = Math.max(0, Number(saved.count) || 0); if (saved.phrase && byId("tasbihPhrase")) byId("tasbihPhrase").value = saved.phrase; if (saved.target && byId("tasbihTarget")) byId("tasbihTarget").value = saved.target; } catch {}
+      byId("tasbihTap")?.addEventListener("click", () => { tasbihCount++; updateTasbih(); });
+      byId("tasbihUndo")?.addEventListener("click", () => { tasbihCount = Math.max(0, tasbihCount - 1); updateTasbih(); });
+      byId("tasbihReset")?.addEventListener("click", () => { tasbihCount = 0; updateTasbih(); });
+      byId("tasbihPhrase")?.addEventListener("change", updateTasbih); byId("tasbihTarget")?.addEventListener("change", updateTasbih); updateTasbih();
+    }
+
+    let currentRadio = null;
+    let currentAudio = null;
+
+    function addExtraRadioCards() {
+      const list = document.querySelector("#radioPanel .radio-list");
+      if (!list) return;
+      const extra = [
+        ["ghamdi", "رادیو قرآن سعد الغامدی", "#0369a1", "#38bdf8"],
+        ["dosari", "رادیو قرآن یاسر الدوسری", "#6d28d9", "#c4b5fd"],
+        ["sudais", "رادیو قرآن عبدالرحمن السدیس", "#9f1239", "#fb7185"],
+        ["shuraim", "رادیو قرآن سعود الشریم", "#92400e", "#fbbf24"],
+        ["abkar", "رادیو قرآن ادریس أبکر", "#047857", "#6ee7b7"],
+        ["ayyub", "رادیو قرآن محمد ایوب", "#4338ca", "#a5b4fc"]
+      ];
+      for (const [key, title, c1, c2] of extra) {
+        if (document.getElementById(`card-${key}`)) continue;
+        const card = document.createElement("article");
+        card.className = "radio-card";
+        card.id = `card-${key}`;
+        card.dataset.radio = key;
+        card.style.setProperty("--rc1", c1);
+        card.style.setProperty("--rc2", c2);
+        card.innerHTML = `
+          <div class="radio-avatar" aria-hidden="true">🎙️</div>
+          <div class="radio-info"><h3>${title}</h3><div class="radio-sub">
+            <span class="eq"><span></span><span></span><span></span><span></span><span></span></span>
+            <span class="radio-status">آمادهٔ پخش</span></div></div>
+          <button class="radio-btn" type="button" aria-label="پخش / توقف ${title}">
+            <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5.5v13a1 1 0 0 0 1.5.86l11-6.5a1 1 0 0 0 0-1.72l-11-6.5A1 1 0 0 0 7 5.5Z"/></svg>
+            <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.4"/><rect x="14" y="5" width="4" height="14" rx="1.4"/></svg>
+          </button>
+          <div class="volume-row"><span class="vol-icon">🔊</span>
+            <input type="range" class="radio-volume" min="0" max="100" value="80" style="--vol:80%">
+            <span class="vol-value">80%</span></div>`;
+        list.appendChild(card);
+      }
+    }
+
+    function setupRadios() {
+      document.querySelectorAll(".radio-card").forEach(card => {
+        const key = card.dataset.radio;
+        const playBtn = card.querySelector(".radio-btn");
+        const volumeSlider = card.querySelector(".radio-volume");
+        const volValue = card.querySelector(".vol-value");
+        const statusEl = card.querySelector(".radio-status");
+        if (!playBtn || !volumeSlider) return;
+
+        playBtn.addEventListener("click", () => {
+          if (currentRadio === key && currentAudio && !currentAudio.paused) stopRadio();
+          else playRadio(key);
+        });
+
+        volumeSlider.addEventListener("input", event => {
+          const val = Number(event.target.value);
+          volumeSlider.style.setProperty("--vol", val + "%");
+          if (volValue) volValue.textContent = val + "%";
+          if (currentRadio === key && currentAudio) currentAudio.volume = val / 100;
+        });
+
+        card._setStatus = (msg) => { if (statusEl) statusEl.textContent = msg; };
+      });
+    }
+
+    function radioUrls(info) {
+      const base = info.urls || (info.url ? [info.url] : []);
+      const out = [];
+      base.forEach(u => {
+        out.push(u);
+        const m = u.match(/^https:\/\/(?:backup\.|radio\.)?qurango\.net\/radio\/(.+)$/);
+        if (m) ["https://backup.qurango.net/radio/", "https://qurango.net/radio/", "https://radio.qurango.net/radio/"].forEach(h => out.push(h + m[1]));
+      });
+      return Array.from(new Set(out));
+    }
+
+    function playRadio(key) {
+      const info = RADIOS[key];
+      if (!info) return;
+      if (currentAudio) {
+        currentAudio.__isStopped = true;
+        currentAudio.pause();
+        currentAudio.src = "";
+        currentAudio.load();
+        currentAudio = null;
+      }
+      resetRadioCards();
+
+      const urls = radioUrls(info);
+      if (!urls.length) return;
+      const audio = new Audio();
+      audio.preload = "auto";
+      audio.__isStopped = false;
+
+      const card = document.getElementById(`card-${key}`);
+      const slider = card?.querySelector(".radio-volume");
+      audio.volume = slider ? Number(slider.value) / 100 : 0.8;
+      const setStatus = card?._setStatus || (() => {});
+      const globalStatus = byId("radioStatus");
+      const dead = () => audio.__isStopped || currentAudio !== audio;
+
+      let attempt = 0;
+      const maxAttempts = urls.length * 2;
+      let started = false;
+      let connectTimer = null;
+      let stallTimer = null;
+
+      function giveUp() {
+        card?.classList.remove("playing");
+        setStatus("پخش نشد؛ دوباره روی پخش بزنید");
+        if (globalStatus) globalStatus.textContent = `اتصال به ${info.title} برقرار نشد. اینترنت را بررسی کنید و دوباره تلاش کنید.`;
+        currentRadio = null;
+        currentAudio = null;
+      }
+      function tryNext() {
+        clearTimeout(connectTimer);
+        clearTimeout(stallTimer);
+        if (dead()) return;
+        if (attempt >= maxAttempts) { giveUp(); return; }
+        const url = urls[attempt % urls.length];
+        attempt += 1;
+        started = false;
+        setStatus(attempt === 1 ? "در حال اتصال…" : `اتصال کند است؛ تلاش ${attempt} از ${maxAttempts}…`);
+        if (globalStatus) globalStatus.textContent = `در حال اتصال به ${info.title}…`;
+        audio.src = url;
+        audio.load();
+        audio.play().catch(err => {
+          if (dead()) return;
+          if (err && err.name === "NotAllowedError") {
+            clearTimeout(connectTimer);
+            card?.classList.remove("playing");
+            setStatus("برای شروع، دوباره روی پخش بزنید");
+          }
+        });
+        connectTimer = setTimeout(() => { if (!dead() && !started) tryNext(); }, 12000);
+      }
+
+      audio.addEventListener("playing", () => {
+        if (dead()) { audio.pause(); return; }
+        started = true;
+        clearTimeout(connectTimer);
+        clearTimeout(stallTimer);
+        attempt = 0;
+        card?.classList.add("playing");
+        setStatus("در حال پخش زنده");
+        if (globalStatus) globalStatus.textContent = `▶ ${info.title} در حال پخش است.`;
+        currentRadio = key;
+      });
+      audio.addEventListener("pause", () => {
+        if (!dead() && currentRadio === key && !audio.ended) return;
+        if (currentRadio === key) { card?.classList.remove("playing"); setStatus("متوقف شد"); }
+      });
+      audio.addEventListener("error", () => { if (!dead()) tryNext(); });
+      audio.addEventListener("ended", () => { if (!dead()) { attempt = 0; tryNext(); } });
+      audio.addEventListener("waiting", () => {
+        if (dead() || !started) return;
+        setStatus("در حال بارگذاری…");
+        clearTimeout(stallTimer);
+        stallTimer = setTimeout(() => { if (!dead()) { attempt = 0; tryNext(); } }, 15000);
+      });
+      audio.addEventListener("stalled", () => { if (!dead() && started) setStatus("اتصال کند است…"); });
+
+      currentRadio = key;
+      currentAudio = audio;
+      tryNext();
+    }
+
+    function stopRadio() {
+      if (currentAudio) {
+        const a = currentAudio;
+        a.__isStopped = true;
+        a.pause();
+        a.removeAttribute("src");
+        a.load();
+        currentAudio = null;
+      }
+      resetRadioCards();
+      currentRadio = null;
+      const gs = byId("radioStatus");
+      if (gs) gs.textContent = "پخش متوقف شد.";
+    }
+
+    function resetRadioCards() {
+      document.querySelectorAll(".radio-card").forEach(card => {
+        card.classList.remove("playing");
+        const st = card.querySelector(".radio-status");
+        if (st) st.textContent = "آمادهٔ پخش";
+      });
+    }
+
+    function localMidnightUtc(date) {
+      const p = localDateParts(date);
+      return new Date(Date.UTC(p.year, p.month - 1, p.day, -3, -30));
+    }
+    function toDate(raw) {
+      if (!raw) return null;
+      if (raw instanceof Date) return raw;
+      if (raw.date instanceof Date) return raw.date;
+      if (raw.date) return new Date(raw.date);
+      if (typeof raw.ut === "number") return new Date(raw.ut * 86400000);
+      return null;
+    }
+    function eventTime(body, observer, direction, start, days) {
+      try { return toDate(Astronomy.SearchRiseSet(body, observer, direction, start, days)); }
+      catch { return null; }
+    }
+    function findFirstSunsetAfter(observer, conjunction) {
+      const start = localMidnightUtc(conjunction);
+      for (let day = 0; day < 4; day++) {
+        const dayStart = new Date(start.getTime() + day * 86400000);
+        const sunset = eventTime("Sun", observer, -1, dayStart, 1);
+        if (sunset && sunset.getTime() > conjunction.getTime()) return sunset;
+      }
+      return null;
+    }
+    function findMoonsetOnSunsetDate(observer, sunset) {
+      const dayStart = localMidnightUtc(sunset);
+      const moonset = eventTime("Moon", observer, -1, dayStart, 1);
+      if (!moonset) return null;
+      return localDateString(moonset) === localDateString(sunset) ? moonset : null;
+    }
+
+    function renderMoonEvents(now) {
+      const phases = [
+        { angle: 0, name: "مقارنه / ماه نو" },
+        { angle: 90, name: "تربیع اول" },
+        { angle: 180, name: "بدر / ماه کامل" },
+        { angle: 270, name: "تربیع آخر" }
+      ];
+      const events = [];
+      for (const phase of phases) {
+        try {
+          const event = toDate(Astronomy.SearchMoonPhase(phase.angle, now, 32));
+          if (event && !Number.isNaN(event.getTime()) &&
+              event >= now && event <= new Date(now.getTime() + 30 * 86400000)) {
+            events.push({ date: event, name: phase.name });
+          }
+        } catch (e) { console.warn(e); }
+      }
+      events.sort((a, b) => a.date - b.date);
+      const target = byId("moonEvents");
+      if (!target) return;
+      if (!events.length) { target.textContent = "رویدادی در بازهٔ ۳۰ روز آینده پیدا نشد."; return; }
+      target.innerHTML = `<div class="event-list">${events.map((item, index) =>
+        `<article class="event-row"><span class="event-dot">${index + 1}</span><div><strong>${item.name}</strong><div class="event-date">${fullDateTime(item.date)}</div></div></article>`
+      ).join("")}</div>`;
+    }
+    function setMoonStatus(id, message) { const el = byId(id); if (el) el.textContent = message; }
+    function checkAstronomy(statusId) {
+      if (!window.Astronomy) {
+        setMoonStatus(statusId, "کتابخانهٔ نجومی بارگذاری نشده است. اتصال اینترنت را بررسی و صفحه را دوباره باز کنید.");
+        return false;
+      }
+      return true;
+    }
+
+    function calculateTodayMoon() {
+      const statusId = "todayMoonStatus";
+      if (!checkAstronomy(statusId)) return;
+      setMoonStatus(statusId, "در حال محاسبه…");
+      try {
+        const now = new Date();
+        const observer = new Astronomy.Observer(LATITUDE, LONGITUDE, 0);
+        const dayStart = localMidnightUtc(now);
+        const sunrise = eventTime("Sun", observer, +1, dayStart, 1);
+        const sunset = eventTime("Sun", observer, -1, dayStart, 1);
+        const moonrise = eventTime("Moon", observer, +1, dayStart, 1);
+        const moonset = eventTime("Moon", observer, -1, dayStart, 1);
+        const sr = byId("sunrise"); if (sr) sr.textContent = sunrise ? formatClock(sunrise) : "محاسبه نشد";
+        const ss = byId("sunset"); if (ss) ss.textContent = sunset ? formatClock(sunset) : "محاسبه نشد";
+        const mr = byId("moonrise"); if (mr) mr.textContent = moonrise ? formatClock(moonrise) : "محاسبه نشد";
+        const ms = byId("moonset"); if (ms) ms.textContent = moonset ? formatClock(moonset) : "محاسبه نشد";
+        setMoonStatus(statusId, `✓ محاسبهٔ وضعیت امروز انجام شد · ${fullDateTime(now)}`);
+      } catch (error) {
+        console.error(error);
+        setMoonStatus(statusId, "محاسبهٔ وضعیت امروز با خطا روبه‌رو شد.");
+      }
+    }
+
+    function calculateNewMoon() {
+      const statusId = "newMoonStatus";
+      if (!checkAstronomy(statusId)) return;
+      setMoonStatus(statusId, "در حال محاسبه…");
+      try {
+        const now = new Date();
+        const observer = new Astronomy.Observer(LATITUDE, LONGITUDE, 0);
+        const conjunction = toDate(Astronomy.SearchMoonPhase(0, now, 40));
+        if (!conjunction || Number.isNaN(conjunction.getTime())) throw new Error("زمان مقارنه معتبر نیست");
+        const firstSunset = findFirstSunsetAfter(observer, conjunction);
+        const nm = byId("newMoon"); if (nm) nm.textContent = fullDateTime(conjunction);
+        const fs = byId("firstSunset"); if (fs) fs.textContent = firstSunset ? fullDateTime(firstSunset) : "—";
+        if (firstSunset && firstSunset > conjunction) {
+          const ageMinutes = (firstSunset - conjunction) / 60000;
+          const ma = byId("moonAge"); if (ma) ma.textContent = formatHM(ageMinutes);
+          const moonsetNearSunset = findMoonsetOnSunsetDate(observer, firstSunset);
+          const moonsetEl = byId("newMoonMoonset");
+          const lagEl = byId("moonLag");
+          if (moonsetNearSunset) {
+            if (moonsetEl) moonsetEl.textContent = fullDateTime(moonsetNearSunset);
+            const lagMinutes = (moonsetNearSunset - firstSunset) / 60000;
+            if (lagEl) {
+              lagEl.textContent = formatHM(lagMinutes);
+              lagEl.classList.toggle("positive", lagMinutes >= 0);
+              lagEl.classList.toggle("negative", lagMinutes < 0);
+            }
+          } else {
+            if (moonsetEl) moonsetEl.textContent = "—";
+            if (lagEl) { lagEl.textContent = "—"; lagEl.classList.remove("positive", "negative"); }
+          }
+          try {
+            const moonVec = Astronomy.GeoVector("Moon", firstSunset, true);
+            const sunVec = Astronomy.GeoVector("Sun", firstSunset, true);
+            const el = byId("elongation");
+            if (el && typeof Astronomy.AngleFromVectors === "function") {
+              el.textContent = `${Number(Astronomy.AngleFromVectors(moonVec, sunVec)).toFixed(2)}°`;
+            } else if (el) el.textContent = "—";
+          } catch (_) { const el = byId("elongation"); if (el) el.textContent = "—"; }
+        } else {
+          ["newMoonMoonset", "moonAge", "moonLag", "elongation"].forEach(id => {
+            const el = byId(id); if (el) el.textContent = "—";
+          });
+        }
+        renderMoonEvents(now);
+        setMoonStatus(statusId, `✓ ماه نوِ آینده: ${fullDateTime(conjunction)}`);
+      } catch (error) {
+        console.error(error);
+        setMoonStatus(statusId, "محاسبهٔ ماه نو ناموفق بود.");
+      }
+    }
+
+    function setupSettings() {
+      const a = byId("adhkarEnabled");
+      if (a) a.addEventListener("change", e => { settings.adhkarEnabled = e.target.checked; saveSettings(); });
+      const b = byId("alertsEnabled");
+      if (b) b.addEventListener("change", e => { settings.alertsEnabled = e.target.checked; saveSettings(); });
+      const h = byId("hijriAdjustment");
+      if (h) h.addEventListener("change", e => {
+        settings.hijriAdjustment = Math.max(-2, Math.min(2, Number(e.target.value) || 0));
+        e.target.value = settings.hijriAdjustment;
+        saveSettings(); loadDateHeader();
+      });
+      const t = byId("themeColor");
+      if (t) t.addEventListener("input", e => { settings.themeColor = e.target.value; saveSettings(); applyTheme(); });
+      const bg = byId("backgroundColor");
+      if (bg) bg.addEventListener("input", e => { settings.backgroundColor = e.target.value; saveSettings(); applyTheme(); });
+      const np = byId("notifyPermission");
+      if (np) np.addEventListener("click", async () => {
+        if (!("Notification" in window)) { alert("اعلان‌ها پشتیبانی نمی‌شوند."); return; }
+        const result = await Notification.requestPermission();
+        alert(result === "granted" ? "اعلان‌ها فعال شدند." : "اجازه داده نشد.");
+      });
+      const c1 = byId("calculateTodayMoon");
+      if (c1) c1.addEventListener("click", calculateTodayMoon);
+      const c2 = byId("calculateNewMoon");
+      if (c2) c2.addEventListener("click", calculateNewMoon);
+    }
+
+    window.addEventListener("beforeinstallprompt", event => {
+      event.preventDefault();
+      deferredInstallPrompt = event;
+      const btn = byId("installButton");
+      if (btn) btn.classList.remove("hidden");
+    });
+    const installBtn = byId("installButton");
+    if (installBtn) installBtn.addEventListener("click", async () => {
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      installBtn.classList.add("hidden");
+    });
+
+    if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js").catch(console.error);
+      });
+    }
+
+    function init() {
+      try { setupNavigation(); } catch (e) { console.error("navigation:", e); }
+      try { setupMushaf(); } catch (e) { console.error("mushaf:", e); }
+      try { setupAdhkar(); } catch (e) { console.error("adhkar:", e); }
+      try { setupSettings(); } catch (e) { console.error("settings:", e); }
+      try { addExtraRadioCards(); } catch (e) { console.error("extra radios:", e); }
+      try { setupRadios(); } catch (e) { console.error("radios:", e); }
+      try { renderSettings(); } catch (e) { console.error("renderSettings:", e); }
+      try { loadDateHeader(); } catch (e) { console.error("dateHeader:", e); }
+      try { loadPrayerTimes(); } catch (e) { console.error("prayerTimes:", e); }
+      setInterval(() => { try { updateCountdown(); } catch (e) { console.error(e); } }, 1000);
+      setInterval(() => {
+        const currentDate = localDateString();
+        if (window.lastPrayerDate !== currentDate) {
+          window.lastPrayerDate = currentDate;
+          notifiedKeys.clear();
+          try { loadDateHeader(); } catch {}
+          try { loadPrayerTimes(); } catch {}
+        }
+      }, 60000);
+    }
+
+    if (document.readyState === "loading") {
+      document.addEventListener("DOMContentLoaded", init);
+    } else {
+      init();
+    }
+  </script>
+  <script>
+    document.querySelectorAll(".bottom-nav button").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        document.querySelectorAll(".bottom-nav button").forEach(function (b) {
+          b.toggleAttribute("aria-current", b === btn);
+          if (b === btn) b.setAttribute("aria-current", "page");
+        });
+      });
+    });
+    document.querySelectorAll("[data-open]").forEach(function (el) {
+      if (el.closest(".bottom-nav")) return;
+      el.addEventListener("click", function () {
+        var t = el.dataset.open;
+        document.querySelectorAll(".bottom-nav button").forEach(function (b) {
+          b.toggleAttribute("aria-current", b.dataset.open === t);
+          if (b.dataset.open === t) b.setAttribute("aria-current", "page");
+        });
+      });
+    });
+  </script>
+</body>
+</html>
