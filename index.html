@@ -7,14 +7,15 @@
   <meta name="description" content="اوقات نماز سوزا، شمارش معکوس اذان و اقامه، مصحف تصویری قرآن کریم">
   <title>اوقات نماز سوزا و مصحف شریف</title>
 
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon-192.png">
   <link rel="apple-touch-icon" href="./icon-192.png">
 
-  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+  <script async src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
     :root {
       --primary: #0f766e;
       --background: #f2f5f3;
@@ -37,7 +38,7 @@
     body {
       margin: 0; min-height: 100vh; color: var(--ink);
       background: linear-gradient(180deg, color-mix(in srgb, var(--primary) 8%, var(--background)) 0, var(--background) 320px), var(--background);
-      font-family: "Vazirmatn", Tahoma, sans-serif; line-height: 1.7;
+      font-family: "Vazirmatn", "Vazir", Tahoma, "Segoe UI", system-ui, sans-serif; line-height: 1.7;
       -webkit-font-smoothing: antialiased;
     }
     button, input, select { font: inherit; }
@@ -933,44 +934,132 @@
       }
     }
 
-    async function loadPrayerTimes() {
-      const date = localDateString();
-      const url = new URL(`https://api.aladhan.com/v1/timings/${date}`);
+    const PRAYER_CACHE_KEY = "suza-prayer-days-v1";
+    let prayerRetryTimer = null;
+
+    function readPrayerCache() {
+      try { return JSON.parse(localStorage.getItem(PRAYER_CACHE_KEY)) || {}; } catch { return {}; }
+    }
+    function writePrayerCache(map) {
+      try {
+        const keys = Object.keys(map);
+        if (keys.length > 70) {
+          const sorted = keys.sort((x, y) => {
+            const [dx, mx, yx] = x.split("-").map(Number), [dy, my, yy] = y.split("-").map(Number);
+            return (yx * 400 + mx * 32 + dx) - (yy * 400 + my * 32 + dy);
+          });
+          sorted.slice(0, keys.length - 70).forEach(k => delete map[k]);
+        }
+        localStorage.setItem(PRAYER_CACHE_KEY, JSON.stringify(map));
+      } catch {}
+    }
+    async function fetchWithTimeout(url, ms) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), ms);
+      try { return await fetch(url, { signal: controller.signal }); } finally { clearTimeout(timer); }
+    }
+    function cleanDay(day) {
+      const timings = {};
+      Object.keys(day.timings || {}).forEach(k => { timings[k] = String(day.timings[k]).split(" ")[0]; });
+      return { ...day, timings };
+    }
+    function prayerParams(url) {
       url.searchParams.set("latitude", LATITUDE);
       url.searchParams.set("longitude", LONGITUDE);
       url.searchParams.set("method", "4");
       url.searchParams.set("school", "0");
       url.searchParams.set("timezonestring", TIME_ZONE);
+      return url;
+    }
+    async function fetchMonth(year, month) {
+      const r = await fetchWithTimeout(prayerParams(new URL(`https://api.aladhan.com/v1/calendar/${year}/${month}`)), 15000);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      if (j.code !== 200 || !Array.isArray(j.data)) throw new Error("پاسخ نامعتبر");
+      const map = {};
+      j.data.forEach(d => {
+        const key = d && d.date && d.date.gregorian && d.date.gregorian.date;
+        if (key && d.timings) map[key] = cleanDay(d);
+      });
+      return map;
+    }
+    async function fetchOneDay(date) {
+      const r = await fetchWithTimeout(prayerParams(new URL(`https://api.aladhan.com/v1/timings/${date}`)), 10000);
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      const j = await r.json();
+      if (j.code !== 200 || !j.data || !j.data.timings) throw new Error("پاسخ نامعتبر");
+      return cleanDay(j.data);
+    }
+    // downloads the current month (and next month near month end) into the local cache
+    async function refreshPrayerCache() {
+      const parts = localDateParts(new Date());
+      const cache = readPrayerCache();
+      Object.assign(cache, await fetchMonth(parts.year, parts.month));
+      writePrayerCache(cache);
+      const later = localDateParts(new Date(Date.now() + 6 * 86400000));
+      if (later.month !== parts.month) {
+        try { Object.assign(cache, await fetchMonth(later.year, later.month)); writePrayerCache(cache); } catch (e) { console.warn("next month:", e); }
+      }
+      return cache;
+    }
+    function useCachedDay(cache) {
+      const day = cache[localDateString()];
+      if (!day) return false;
+      prayerData = { ...day };
+      const tomorrow = cache[localDateString(new Date(Date.now() + 86400000))];
+      if (tomorrow && tomorrow.timings && tomorrow.timings.Fajr) prayerData.tomorrowFajr = tomorrow.timings.Fajr;
+      renderPrayerTimes();
+      try { updateCountdown(); } catch {}
+      return true;
+    }
+
+    async function loadPrayerTimes() {
+      clearTimeout(prayerRetryTimer);
+      const date = localDateString();
       const statusEl = byId("prayerStatus");
+      const cache = readPrayerCache();
+
+      // 1) show saved times instantly (no waiting for the network)
+      if (useCachedDay(cache)) {
+        if (statusEl) statusEl.textContent = "✓ اوقات امروز (ذخیره‌شده در برنامه).";
+        const ahead = localDateString(new Date(Date.now() + 5 * 86400000));
+        if (!cache[ahead]) {
+          refreshPrayerCache().then(c => { useCachedDay(c); }).catch(e => console.warn("background refresh:", e));
+        }
+        return;
+      }
+
+      // 2) nothing saved: download the whole month once, with timeouts
       if (statusEl) statusEl.textContent = "در حال دریافت اوقات نماز…";
       try {
-        const response = await fetch(url);
-        if (!response.ok) throw new Error(`HTTP ${response.status}`);
-        const json = await response.json();
-        if (json.code !== 200 || !json.data?.timings) throw new Error("پاسخ نامعتبر");
-        prayerData = json.data;
-        renderPrayerTimes();
+        const fresh = await refreshPrayerCache();
+        if (!useCachedDay(fresh)) throw new Error("اوقات امروز در پاسخ نبود");
+        if (statusEl) statusEl.textContent = "✓ اوقات نماز دریافت و ذخیره شد.";
+        return;
+      } catch (error) {
+        console.warn("month fetch failed:", error);
+      }
+      // 3) fall back to a single day
+      try {
+        const day = await fetchOneDay(date);
+        const c = readPrayerCache(); c[date] = day; writePrayerCache(c);
+        useCachedDay(c);
+        if (statusEl) statusEl.textContent = "✓ اوقات امروز دریافت شد.";
         loadTomorrowFajr();
-        if (statusEl) statusEl.textContent = "✓ اوقات امروز به‌روزرسانی شد.";
       } catch (error) {
         console.error(error);
-        if (statusEl) statusEl.textContent = "دریافت اوقات نماز ناموفق بود؛ اتصال اینترنت را بررسی کنید.";
+        if (statusEl) statusEl.textContent = "دریافت اوقات نماز ناموفق بود؛ هر ۲۰ ثانیه دوباره تلاش می‌شود…";
+        prayerRetryTimer = setTimeout(loadPrayerTimes, 20000);
       }
     }
 
     async function loadTomorrowFajr() {
       try {
-        const url = new URL(`https://api.aladhan.com/v1/timings/${localDateString(new Date(Date.now() + 86400000))}`);
-        url.searchParams.set("latitude", LATITUDE);
-        url.searchParams.set("longitude", LONGITUDE);
-        url.searchParams.set("method", "4");
-        url.searchParams.set("school", "0");
-        url.searchParams.set("timezonestring", TIME_ZONE);
-        const r = await fetch(url);
-        if (!r.ok) return;
-        const j = await r.json();
-        const f = j && j.data && j.data.timings && j.data.timings.Fajr;
-        if (f && prayerData) { prayerData.tomorrowFajr = f; updateCountdown(); }
+        const key = localDateString(new Date(Date.now() + 86400000));
+        const cache = readPrayerCache();
+        let day = cache[key];
+        if (!day) { day = await fetchOneDay(key); cache[key] = day; writePrayerCache(cache); }
+        if (day && day.timings && day.timings.Fajr && prayerData) { prayerData.tomorrowFajr = day.timings.Fajr; updateCountdown(); }
       } catch (e) { console.warn("tomorrow fajr:", e); }
     }
 
