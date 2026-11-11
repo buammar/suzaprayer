@@ -7,13 +7,10 @@
   <meta name="description" content="اوقات نماز سوزا، شمارش معکوس اذان و اقامه، مصحف تصویری قرآن کریم">
   <title>اوقات نماز سوزا و مصحف شریف</title>
 
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" media="print" onload="this.media='all'">
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="icon" href="./icon-192.png">
   <link rel="apple-touch-icon" href="./icon-192.png">
 
-  <script async src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
 
   <style>
     :root {
@@ -165,6 +162,63 @@
     .offset-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: .8rem; color: var(--muted); }
     .offset-row button { padding: 4px 14px; border-radius: 10px; font-size: 1.1rem; line-height: 1.3; }
     .offset-row b { min-width: 24px; text-align: center; color: var(--ink); direction: ltr; }
+    /* mushaf home + settings */
+    .loader-only { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; padding: 0 !important; margin: 0 !important; border: 0 !important; }
+    .mushaf-home { display: grid; gap: 10px; }
+    .continue-btn { display: flex; align-items: center; gap: 14px; text-align: right; padding: 16px; border-radius: 18px; color: #fff;
+      background: var(--star), linear-gradient(135deg, var(--deep), color-mix(in srgb, var(--primary) 85%, #000)); }
+    .continue-btn:hover { background: var(--star), linear-gradient(135deg, var(--deep), color-mix(in srgb, var(--primary) 85%, #000)); filter: brightness(1.08); }
+    .continue-ico { flex: none; width: 48px; height: 48px; border-radius: 15px; display: grid; place-items: center; background: rgba(255,255,255,.16); }
+    .continue-ico svg { width: 24px; height: 24px; fill: none; stroke: #fff; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+    .continue-text small { display: block; font-weight: 500; opacity: .8; font-size: .82rem; }
+    .continue-text b { font-size: 1.18rem; font-weight: 800; }
+    .index-btn { padding: 13px; border-radius: 16px; }
+    .mushaf-settings summary { cursor: pointer; font-weight: 800; list-style: none; display: flex; justify-content: space-between; align-items: center; }
+    .mushaf-settings summary::-webkit-details-marker { display: none; }
+    .mushaf-settings summary::after { content: "＋"; color: var(--primary); font-size: 1.2rem; }
+    .mushaf-settings[open] summary::after { content: "−"; }
+
+    /* reader: top bar buttons + status toast */
+    .mushaf-fullscreen .fs-bar { grid-template-columns: auto 1fr auto 1fr auto; }
+    .fs-bar .fs-btn { pointer-events: auto; width: 38px; height: 38px; padding: 0; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.12); color: #fff; }
+    .fs-bar .fs-btn:hover { background: rgba(255,255,255,.2); }
+    .fs-bar .fs-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .mushaf-fullscreen .fs-status {
+      position: fixed; z-index: 100001; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px);
+      max-width: 88vw; padding: 9px 18px; border-radius: 999px; background: rgba(30,30,30,.9); color: #fff; font-size: .85rem; font-weight: 600;
+      opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; text-align: center;
+    }
+    .mushaf-fullscreen .fs-status.show { opacity: 1; transform: translateX(-50%); }
+
+    /* index sheet: surahs + juz */
+    .index-sheet { position: fixed; inset: 0; z-index: 100002; display: flex; flex-direction: column; background: var(--background);
+      transform: translateY(100%); visibility: hidden; transition: transform .28s cubic-bezier(.2,.8,.2,1), visibility 0s .28s; }
+    .index-sheet.open { transform: none; visibility: visible; transition: transform .28s cubic-bezier(.2,.8,.2,1); }
+    .index-head { flex: none; padding: calc(env(safe-area-inset-top, 0px) + 12px) 14px 10px; background: var(--surface); border-bottom: 1px solid var(--line); }
+    .index-title { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .index-title h2 { margin: 0; font-size: 1.25rem; font-weight: 800; }
+    .index-close { width: 38px; height: 38px; padding: 0; border-radius: 12px; display: grid; place-items: center; color: var(--ink); background: var(--tint-2); }
+    .index-close:hover { background: var(--tint-2); filter: brightness(.96); }
+    .index-close svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
+    .index-search { display: flex; align-items: center; gap: 10px; padding: 0 14px; border-radius: 14px; background: var(--tint); border: 1.5px solid transparent; }
+    .index-search:focus-within { border-color: var(--primary); background: #fff; }
+    .index-search svg { flex: none; width: 20px; height: 20px; fill: none; stroke: var(--muted); stroke-width: 2; stroke-linecap: round; }
+    .index-search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; padding: 12px 0; color: var(--ink); font-size: 1rem; }
+    .index-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; margin-top: 10px; padding: 4px; border-radius: 14px; background: var(--tint); }
+    .index-tabs button { padding: 8px; border-radius: 11px; color: var(--muted); background: transparent; font-weight: 700; }
+    .index-tabs button:hover { background: transparent; }
+    .index-tabs button.on { color: var(--primary); background: #fff; box-shadow: 0 1px 4px rgba(16,40,34,.14); }
+    .index-list { flex: 1; overflow-y: auto; padding: 12px 12px calc(20px + env(safe-area-inset-bottom, 0px)); -webkit-overflow-scrolling: touch; }
+    .index-row { display: grid; grid-template-columns: 46px 1fr auto; gap: 12px; align-items: center; width: 100%; margin-bottom: 7px; padding: 10px 12px;
+      border-radius: 16px; background: var(--surface); color: var(--ink); text-align: right; border: 1.5px solid transparent; box-shadow: 0 1px 2px rgba(16,40,34,.05); font-weight: inherit; }
+    .index-row:hover { background: var(--tint); }
+    .index-row.current { background: var(--tint-2); border-color: var(--primary); }
+    .index-num { width: 46px; height: 46px; border-radius: 15px; display: grid; place-items: center; font-weight: 800; color: var(--primary); background: var(--tint); font-variant-numeric: tabular-nums; }
+    .index-row.current .index-num { color: #fff; background: var(--primary); }
+    .index-main b { display: block; font-size: 1.15rem; font-weight: 800; line-height: 1.5; }
+    .index-main small { color: var(--muted); font-size: .78rem; font-weight: 500; }
+    .index-page { font-size: .78rem; font-weight: 700; color: var(--muted); background: var(--tint); padding: 3px 11px; border-radius: 999px; font-variant-numeric: tabular-nums; }
+    .index-empty { text-align: center; color: var(--muted); padding: 40px 0; }
     .source-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 12px 0 16px; }
     .source-card { border: 1.5px solid var(--line); border-radius: 16px; padding: 10px; background: #fff; text-align: center; color: var(--ink); }
     .source-card img { width: 100%; height: 140px; object-fit: contain; background: #f4ecd8; border-radius: 10px; display: block; margin-bottom: 8px; }
@@ -385,36 +439,38 @@
     </section>
 
     <section id="mushafPanel" class="hidden">
-      <div class="card">
-        <div class="panel-top"><h2>مصحف شریف</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
+      <div class="panel-top"><h2>مصحف شریف</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
 
-        <div class="mushaf-tools">
-          <button id="mushafFullscreenBtn" class="secondary" type="button">⛶ نمای تمام‌صفحه</button>
+      <div class="card mushaf-home">
+        <button type="button" id="mushafContinueBtn" class="continue-btn">
+          <span class="continue-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h7A3 3 0 0 1 12 7.5V20a2 2 0 0 0-2-2H2z"/><path d="M22 4.5h-7a3 3 0 0 0-3 3V20a2 2 0 0 1 2-2h8z"/></svg></span>
+          <span class="continue-text"><small>ادامهٔ مطالعه</small><b id="mushafContinueInfo">—</b></span>
+        </button>
+        <button type="button" id="mushafIndexBtn" class="secondary index-btn">فهرست سوره‌ها و اجزاء</button>
+        <p class="note">با زدن یک ضربه روی صفحه، نوار اطلاعات و دکمهٔ فهرست ظاهر می‌شود. برای ورق زدن بکشید و برای خروج دو ضربه بزنید.</p>
+      </div>
+
+      <details class="card mushaf-settings" id="mushafSettings">
+        <summary>تنظیمات مصحف</summary>
+        <div class="mushaf-tools" style="margin-top:12px">
           <button id="mushafCropBtn" class="secondary hidden" type="button" aria-pressed="true">حذف حاشیه: روشن</button>
         </div>
-
-        <div class="mushaf-page-wrap" id="mushafPageWrap">
-          <div class="crop-frame" id="mushafFrame">
-            <img id="mushafImage" src="" alt="صفحهٔ مصحف شریف" loading="eager">
-          </div>
-          <p id="mushafStatus" class="mushaf-caption" aria-live="polite">در حال بارگذاری…</p>
-          <div id="redOffsetRow" class="offset-row hidden">
-            <span>اگر شمارهٔ صفحه با تصویر نمی‌خواند، تنظیم کنید:</span>
-            <button type="button" class="secondary" id="redOffsetMinus" aria-label="یک برگ قبل">−</button>
-            <b id="redOffsetValue">0</b>
-            <button type="button" class="secondary" id="redOffsetPlus" aria-label="یک برگ بعد">+</button>
-          </div>
+        <div id="redOffsetRow" class="offset-row hidden">
+          <span>اگر شمارهٔ صفحه با تصویر نمی‌خواند، تنظیم کنید:</span>
+          <button type="button" class="secondary" id="redOffsetMinus" aria-label="یک برگ قبل">−</button>
+          <b id="redOffsetValue">0</b>
+          <button type="button" class="secondary" id="redOffsetPlus" aria-label="یک برگ بعد">+</button>
         </div>
-
-        <h3 style="margin-top:20px">انتخاب منبع صفحات با پیش‌نمایش</h3>
-        <p class="note">یکی از سه منبع را انتخاب کنید. انتخاب شما ذخیره می‌شود؛ اگر منبع انتخابی در دسترس نباشد، برنامه منابع دیگر را نیز امتحان می‌کند.</p>
+        <h3 style="margin-top:18px">منبع تصاویر صفحات</h3>
+        <p class="note">انتخاب شما ذخیره می‌شود؛ اگر منبع در دسترس نباشد، برنامه منابع دیگر را امتحان می‌کند.</p>
         <div id="mushafSourcePicker" class="source-grid"></div>
-        <p class="mushaf-caption" style="margin-top:14px">برای جابجایی صفحه، روی تصویر بکشید (Swipe) یا از فهرست سوره‌ها استفاده کنید.</p>
+      </details>
 
-        <h3 style="margin-top:22px">فهرست سوره‌ها</h3>
-        <div id="surahList" class="surah-list"></div>
-
-        <p class="mushaf-caption">تصاویر صفحات از منبع انتخابی بارگذاری می‌شوند؛ برای نمایش صفحات و پیش‌نمایش‌ها اتصال اینترنت لازم است.</p>
+      <div class="mushaf-page-wrap loader-only" id="mushafPageWrap" aria-hidden="true">
+        <div class="crop-frame" id="mushafFrame">
+          <img id="mushafImage" src="" alt="صفحهٔ مصحف شریف" loading="eager">
+        </div>
+        <p id="mushafStatus" class="mushaf-caption" aria-live="polite"></p>
       </div>
     </section>
 
@@ -692,7 +748,7 @@
           <button id="notifyPermission" type="button">🔔 فعال‌کردن اعلان‌ها</button>
           <button id="installButton" class="secondary hidden" type="button">⬇ نصب برنامه</button>
         </div>
-        <p class="note">اوقات نماز از سرویس AlAdhan دریافت می‌شوند. برای دریافت دادهٔ تازه اتصال اینترنت لازم است.</p>
+        <p class="note">اوقات نماز روی خود گوشی و بدون اینترنت محاسبه می‌شود (روش ام‌القری، فقه شافعی). ممکن است با تقویم‌های محلی تا یکی دو دقیقه اختلاف داشته باشد.</p>
       </div>
       <div class="card">
         <h2>تنظیمات اقامه و اعلان‌ها</h2>
@@ -934,133 +990,103 @@
       }
     }
 
-    const PRAYER_CACHE_KEY = "suza-prayer-days-v1";
-    let prayerRetryTimer = null;
-
-    function readPrayerCache() {
-      try { return JSON.parse(localStorage.getItem(PRAYER_CACHE_KEY)) || {}; } catch { return {}; }
-    }
-    function writePrayerCache(map) {
-      try {
-        const keys = Object.keys(map);
-        if (keys.length > 70) {
-          const sorted = keys.sort((x, y) => {
-            const [dx, mx, yx] = x.split("-").map(Number), [dy, my, yy] = y.split("-").map(Number);
-            return (yx * 400 + mx * 32 + dx) - (yy * 400 + my * 32 + dy);
-          });
-          sorted.slice(0, keys.length - 70).forEach(k => delete map[k]);
+    /* ---------- اوقات نماز: محاسبهٔ محلی روی خود گوشی (بدون نیاز به اینترنت) ---------- */
+    // روش ام‌القری: فجر ۱۸٫۵ درجه، مغرب = غروب، عشاء ۹۰ دقیقه بعد از مغرب (۱۲۰ دقیقه در ماه رمضان)، عصر شافعی
+    const PrayerCalc = (() => {
+      const R = Math.PI / 180;
+      const sin = x => Math.sin(x * R), cos = x => Math.cos(x * R), tan = x => Math.tan(x * R);
+      const asin = x => Math.asin(x) / R, acos = x => Math.acos(x) / R;
+      const atan2 = (y, x) => Math.atan2(y, x) / R, acot = x => Math.atan(1 / x) / R;
+      const fix = (a, m) => { const r = a - m * Math.floor(a / m); return r < 0 ? r + m : r; };
+      function julian(y, m, d) {
+        if (m <= 2) { y -= 1; m += 12; }
+        const A = Math.floor(y / 100), B = 2 - A + Math.floor(A / 4);
+        return Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + B - 1524.5;
+      }
+      function sunPos(jd) {
+        const D = jd - 2451545.0;
+        const g = fix(357.529 + 0.98560028 * D, 360);
+        const q = fix(280.459 + 0.98564736 * D, 360);
+        const L = fix(q + 1.915 * sin(g) + 0.020 * sin(2 * g), 360);
+        const e = 23.439 - 0.00000036 * D;
+        const RA = fix(atan2(cos(e) * sin(L), cos(L)) / 15, 24);
+        let eqt = q / 15 - RA;
+        if (eqt > 12) eqt -= 24;
+        if (eqt < -12) eqt += 24;
+        return { decl: asin(sin(e) * sin(L)), eqt };
+      }
+      function compute(year, month, day, lat, lng, tz, ishaMinutes) {
+        const jd = julian(year, month, day) - lng / (15 * 24);
+        const midDay = t => fix(12 - sunPos(jd + t).eqt, 24);
+        const angleTime = (angle, t, ccw) => {
+          const decl = sunPos(jd + t).decl;
+          const v = (-sin(angle) - sin(decl) * sin(lat)) / (cos(decl) * cos(lat));
+          if (v < -1 || v > 1) return NaN;
+          const h = acos(v) / 15;
+          return midDay(t) + (ccw ? -h : h);
+        };
+        const asrTime = (factor, t) => {
+          const decl = sunPos(jd + t).decl;
+          return angleTime(-acot(factor + tan(Math.abs(lat - decl))), t, false);
+        };
+        let t = { fajr: 5, sunrise: 6, dhuhr: 12, asr: 13, sunset: 18 };
+        for (let i = 0; i < 3; i++) {
+          t = {
+            fajr: angleTime(18.5, t.fajr / 24, true),
+            sunrise: angleTime(0.833, t.sunrise / 24, true),
+            dhuhr: midDay(t.dhuhr / 24),
+            asr: asrTime(1, t.asr / 24),
+            sunset: angleTime(0.833, t.sunset / 24, false)
+          };
         }
-        localStorage.setItem(PRAYER_CACHE_KEY, JSON.stringify(map));
-      } catch {}
+        const shift = tz - lng / 15;
+        const out = {};
+        Object.keys(t).forEach(k => { out[k] = t[k] + shift; });
+        out.maghrib = out.sunset;
+        out.isha = out.maghrib + ishaMinutes / 60;
+        return out;
+      }
+      return { compute };
+    })();
+
+    function tzOffsetHours(y, m, d) {
+      const noon = Date.UTC(y, m - 1, d, 12);
+      const parts = new Intl.DateTimeFormat("en-GB", { timeZone: TIME_ZONE, hourCycle: "h23", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" }).formatToParts(new Date(noon));
+      const g = type => Number(parts.find(p => p.type === type).value);
+      return (Date.UTC(g("year"), g("month") - 1, g("day"), g("hour"), g("minute")) - noon) / 3600000;
     }
-    async function fetchWithTimeout(url, ms) {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), ms);
-      try { return await fetch(url, { signal: controller.signal }); } finally { clearTimeout(timer); }
+    function isRamadan(y, m, d) {
+      try {
+        const mo = new Intl.DateTimeFormat("en-u-ca-islamic-umalqura", { timeZone: TIME_ZONE, month: "numeric" }).format(new Date(Date.UTC(y, m - 1, d, 9)));
+        return Number(mo) === 9;
+      } catch { return false; }
     }
-    function cleanDay(day) {
+    function hoursToClock(h) {
+      let total = Math.round((((h % 24) + 24) % 24) * 60);
+      if (total >= 1440) total -= 1440;
+      return String(Math.floor(total / 60)).padStart(2, "0") + ":" + String(total % 60).padStart(2, "0");
+    }
+    function computePrayerDay(date) {
+      const p = localDateParts(date);
+      const r = PrayerCalc.compute(p.year, p.month, p.day, LATITUDE, LONGITUDE, tzOffsetHours(p.year, p.month, p.day), isRamadan(p.year, p.month, p.day) ? 120 : 90);
       const timings = {};
-      Object.keys(day.timings || {}).forEach(k => { timings[k] = String(day.timings[k]).split(" ")[0]; });
-      return { ...day, timings };
-    }
-    function prayerParams(url) {
-      url.searchParams.set("latitude", LATITUDE);
-      url.searchParams.set("longitude", LONGITUDE);
-      url.searchParams.set("method", "4");
-      url.searchParams.set("school", "0");
-      url.searchParams.set("timezonestring", TIME_ZONE);
-      return url;
-    }
-    async function fetchMonth(year, month) {
-      const r = await fetchWithTimeout(prayerParams(new URL(`https://api.aladhan.com/v1/calendar/${year}/${month}`)), 15000);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const j = await r.json();
-      if (j.code !== 200 || !Array.isArray(j.data)) throw new Error("پاسخ نامعتبر");
-      const map = {};
-      j.data.forEach(d => {
-        const key = d && d.date && d.date.gregorian && d.date.gregorian.date;
-        if (key && d.timings) map[key] = cleanDay(d);
-      });
-      return map;
-    }
-    async function fetchOneDay(date) {
-      const r = await fetchWithTimeout(prayerParams(new URL(`https://api.aladhan.com/v1/timings/${date}`)), 10000);
-      if (!r.ok) throw new Error(`HTTP ${r.status}`);
-      const j = await r.json();
-      if (j.code !== 200 || !j.data || !j.data.timings) throw new Error("پاسخ نامعتبر");
-      return cleanDay(j.data);
-    }
-    // downloads the current month (and next month near month end) into the local cache
-    async function refreshPrayerCache() {
-      const parts = localDateParts(new Date());
-      const cache = readPrayerCache();
-      Object.assign(cache, await fetchMonth(parts.year, parts.month));
-      writePrayerCache(cache);
-      const later = localDateParts(new Date(Date.now() + 6 * 86400000));
-      if (later.month !== parts.month) {
-        try { Object.assign(cache, await fetchMonth(later.year, later.month)); writePrayerCache(cache); } catch (e) { console.warn("next month:", e); }
-      }
-      return cache;
-    }
-    function useCachedDay(cache) {
-      const day = cache[localDateString()];
-      if (!day) return false;
-      prayerData = { ...day };
-      const tomorrow = cache[localDateString(new Date(Date.now() + 86400000))];
-      if (tomorrow && tomorrow.timings && tomorrow.timings.Fajr) prayerData.tomorrowFajr = tomorrow.timings.Fajr;
-      renderPrayerTimes();
-      try { updateCountdown(); } catch {}
-      return true;
+      [["Fajr", "fajr"], ["Sunrise", "sunrise"], ["Dhuhr", "dhuhr"], ["Asr", "asr"], ["Sunset", "sunset"], ["Maghrib", "maghrib"], ["Isha", "isha"]].forEach(([k, v]) => { timings[k] = hoursToClock(r[v]); });
+      return { timings };
     }
 
-    async function loadPrayerTimes() {
-      clearTimeout(prayerRetryTimer);
-      const date = localDateString();
+    function loadPrayerTimes() {
       const statusEl = byId("prayerStatus");
-      const cache = readPrayerCache();
-
-      // 1) show saved times instantly (no waiting for the network)
-      if (useCachedDay(cache)) {
-        if (statusEl) statusEl.textContent = "✓ اوقات امروز (ذخیره‌شده در برنامه).";
-        const ahead = localDateString(new Date(Date.now() + 5 * 86400000));
-        if (!cache[ahead]) {
-          refreshPrayerCache().then(c => { useCachedDay(c); }).catch(e => console.warn("background refresh:", e));
-        }
-        return;
-      }
-
-      // 2) nothing saved: download the whole month once, with timeouts
-      if (statusEl) statusEl.textContent = "در حال دریافت اوقات نماز…";
       try {
-        const fresh = await refreshPrayerCache();
-        if (!useCachedDay(fresh)) throw new Error("اوقات امروز در پاسخ نبود");
-        if (statusEl) statusEl.textContent = "✓ اوقات نماز دریافت و ذخیره شد.";
-        return;
-      } catch (error) {
-        console.warn("month fetch failed:", error);
-      }
-      // 3) fall back to a single day
-      try {
-        const day = await fetchOneDay(date);
-        const c = readPrayerCache(); c[date] = day; writePrayerCache(c);
-        useCachedDay(c);
-        if (statusEl) statusEl.textContent = "✓ اوقات امروز دریافت شد.";
-        loadTomorrowFajr();
+        const today = computePrayerDay(new Date());
+        const tomorrow = computePrayerDay(new Date(Date.now() + 86400000));
+        prayerData = { ...today, tomorrowFajr: tomorrow.timings.Fajr };
+        renderPrayerTimes();
+        try { updateCountdown(); } catch {}
+        if (statusEl) statusEl.textContent = "✓ اوقات روی خود گوشی محاسبه می‌شود (روش ام‌القری، فقه شافعی) و به اینترنت نیاز ندارد.";
       } catch (error) {
         console.error(error);
-        if (statusEl) statusEl.textContent = "دریافت اوقات نماز ناموفق بود؛ هر ۲۰ ثانیه دوباره تلاش می‌شود…";
-        prayerRetryTimer = setTimeout(loadPrayerTimes, 20000);
+        if (statusEl) statusEl.textContent = "محاسبهٔ اوقات نماز با خطا روبه‌رو شد.";
       }
-    }
-
-    async function loadTomorrowFajr() {
-      try {
-        const key = localDateString(new Date(Date.now() + 86400000));
-        const cache = readPrayerCache();
-        let day = cache[key];
-        if (!day) { day = await fetchOneDay(key); cache[key] = day; writePrayerCache(cache); }
-        if (day && day.timings && day.timings.Fajr && prayerData) { prayerData.tomorrowFajr = day.timings.Fajr; updateCountdown(); }
-      } catch (e) { console.warn("tomorrow fajr:", e); }
     }
 
     function renderPrayerTimes() {
@@ -1238,6 +1264,8 @@
             if (el) el.classList.toggle("hidden", id !== target);
           });
           window.scrollTo({ top: 0, behavior: "smooth" });
+          if (target === "mushafPanel") { try { openFullscreen(); } catch (e) { console.error(e); } }
+          if (target === "moonPanel") { try { loadAstronomy(); } catch {} }
         });
       });
     }
@@ -1271,6 +1299,7 @@
       const next = Math.max(1, Math.min(604, Math.trunc(Number(page) || 1)));
       mushafPage = next;
       updateFsBar();
+      updateMushafHome();
       const image = byId("mushafImage");
       const statusEl = byId("mushafStatus");
       if (!image) return;
@@ -1286,7 +1315,7 @@
         if (mushafPage !== next) return;
         mushafGoodSource = currentIdx;
         mushafCache.set(next, { url: image.src, idx: currentIdx });
-        if (statusEl) statusEl.textContent = `صفحهٔ ${next} از ۶۰۴ · روایت حفص`;
+        mushafSay(`صفحهٔ ${next} از ۶۰۴ · روایت حفص`, "ok");
         if (fullscreenImage) { fullscreenImage.src = image.src; fullscreenImage.alt = image.alt; }
         applyMushafCrop();
         setTimeout(() => { if (mushafPage === next) preloadMushafPages(next); }, 60);
@@ -1294,13 +1323,14 @@
       function tryLoad() {
         clearTimeout(mushafLoadTimer);
         if (attempt >= order.length) {
-          if (statusEl) statusEl.textContent = `بارگذاری صفحهٔ ${next} ناموفق بود. اتصال اینترنت را بررسی کنید.`;
+          mushafSay(`بارگذاری صفحهٔ ${next} ناموفق بود؛ اتصال اینترنت را بررسی کنید. دوباره تلاش می‌شود…`, "fail");
+          setTimeout(() => { if (mushafPage === next && fullscreenWrap) showMushafPage(next); }, 8000);
           return;
         }
         currentIdx = order[attempt];
         const url = (attempt === 0 && cached) ? cached.url : MUSHAF_SOURCES[currentIdx].url(next);
-        if (statusEl && !(attempt === 0 && cached)) {
-          statusEl.textContent = attempt === 0 ? `در حال بارگذاری صفحهٔ ${next}…` : `منبع انتخابی کند یا در دسترس نبود؛ تلاش با ${MUSHAF_SOURCES[currentIdx].name}…`;
+        if (!(attempt === 0 && cached)) {
+          mushafSay(attempt === 0 ? `در حال بارگذاری صفحهٔ ${faDigits(next)}…` : `منبع کند یا در دسترس نبود؛ تلاش با منبع دیگر…`, "load");
         }
         if (image.src === url && image.complete && image.naturalWidth) { finish(); return; }
         image.src = url;
@@ -1386,8 +1416,19 @@
 
       fullscreenBar = document.createElement("div");
       fullscreenBar.className = "fs-bar";
-      fullscreenBar.innerHTML = '<span class="fs-juz"></span><span class="fs-page"></span><span class="fs-surah"></span>';
+      fullscreenBar.innerHTML = '<button type="button" class="fs-btn fs-list" aria-label="فهرست"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button><span class="fs-juz"></span><span class="fs-page"></span><span class="fs-surah"></span><button type="button" class="fs-btn fs-close" aria-label="خروج"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
       fullscreenWrap.appendChild(fullscreenBar);
+      fullscreenToast = document.createElement("div");
+      fullscreenToast.className = "fs-status";
+      fullscreenWrap.appendChild(fullscreenToast);
+      const bindBtn = (el, fn) => {
+        el.addEventListener("touchstart", e => e.stopPropagation(), { passive: true });
+        el.addEventListener("touchend", e => { e.preventDefault(); e.stopPropagation(); fn(); }, { passive: false });
+        el.addEventListener("click", e => { e.stopPropagation(); fn(); });
+        el.addEventListener("dblclick", e => e.stopPropagation());
+      };
+      bindBtn(fullscreenBar.querySelector(".fs-list"), openIndexSheet);
+      bindBtn(fullscreenBar.querySelector(".fs-close"), () => closeFullscreen());
       updateFsBar();
 
       function handleDoubleTap(e) {
@@ -1444,6 +1485,8 @@
       });
 
       document.body.appendChild(fullscreenWrap);
+      if (history.state && history.state.layer === "sheet") { try { history.replaceState({ layer: "reader" }, ""); } catch {} }
+      else pushLayer("reader");
       fullscreenImage.addEventListener("load", applyMushafCrop);
       applyMushafCrop();
 
@@ -1457,7 +1500,9 @@
       }
     }
 
-    function closeFullscreen() {
+    function closeFullscreen(fromPop) {
+      if (sheetOpen) closeIndexSheet(true);
+      if (fullscreenWrap && !fromPop) popLayer("reader");
       if (fullscreenWrap && fullscreenWrap.parentNode) {
         fullscreenWrap.parentNode.removeChild(fullscreenWrap);
       }
@@ -1465,6 +1510,7 @@
       fullscreenImage = null;
       fullscreenFrame = null;
       fullscreenBar = null;
+      fullscreenToast = null;
       lastTapTime = 0;
       if (tapTimer) { clearTimeout(tapTimer); tapTimer = null; }
       if (document.fullscreenElement && document.exitFullscreen) {
@@ -1477,8 +1523,10 @@
     }
 
     function setupFullscreen() {
-      const btn = byId("mushafFullscreenBtn");
-      if (btn) btn.addEventListener("click", openFullscreen);
+      const cont = byId("mushafContinueBtn");
+      if (cont) cont.addEventListener("click", openFullscreen);
+      const idx = byId("mushafIndexBtn");
+      if (idx) idx.addEventListener("click", openIndexSheet);
       document.addEventListener("fullscreenchange", () => {
         if (!document.fullscreenElement && fullscreenWrap) closeFullscreen();
       });
@@ -1486,7 +1534,7 @@
         if (!document.webkitFullscreenElement && fullscreenWrap) closeFullscreen();
       });
       document.addEventListener("keydown", (e) => {
-        if (e.key === "Escape" && fullscreenWrap) closeFullscreen();
+        if (e.key === "Escape") { if (sheetOpen) closeIndexSheet(); else if (fullscreenWrap) closeFullscreen(); }
       });
     }
 
@@ -1530,6 +1578,131 @@
     function toggleFsBar() {
       if (fullscreenBar) fullscreenBar.classList.toggle("show");
     }
+    const SURAH_AYAHS = [7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+    const MEDINAN_SURAHS = new Set([2,3,4,5,8,9,22,24,33,47,48,49,55,57,58,59,60,61,62,63,64,65,66,76,98,99,110]);
+    const faDigits = n => String(n).replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]);
+    function normSearch(text) {
+      return String(text || "")
+        .replace(/[\u064B-\u065F\u0670\u0640]/g, "")
+        .replace(/[أإآٱ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").replace(/ک/g, "ك").replace(/ی/g, "ي")
+        .replace(/[۰-۹]/g, c => "۰۱۲۳۴۵۶۷۸۹".indexOf(c))
+        .replace(/[٠-٩]/g, c => "٠١٢٣٤٥٦٧٨٩".indexOf(c))
+        .trim().toLowerCase();
+    }
+
+    /* لایه‌های «برگشت» اندروید: دکمهٔ برگشت ابتدا فهرست، بعد مصحف را می‌بندد */
+    let ignorePop = 0;
+    function pushLayer(name) { try { history.pushState({ layer: name }, ""); } catch {} }
+    function popLayer(name) { try { if (history.state && history.state.layer === name) { ignorePop++; history.back(); } } catch {} }
+    window.addEventListener("popstate", () => {
+      if (ignorePop > 0) { ignorePop--; return; }
+      if (sheetOpen) closeIndexSheet(true);
+      else if (fullscreenWrap) closeFullscreen(true);
+    });
+
+    let indexSheet = null, sheetOpen = false, indexTab = "surah";
+    function currentSurahNumber() {
+      let surah = 1;
+      for (let n = 1; n <= 114; n++) { if ((SURAH_PAGES[n] || 1) <= mushafPage) surah = n; else break; }
+      return surah;
+    }
+    function buildIndexSheet() {
+      indexSheet = document.createElement("div");
+      indexSheet.className = "index-sheet";
+      indexSheet.setAttribute("role", "dialog");
+      indexSheet.setAttribute("aria-label", "فهرست مصحف");
+      indexSheet.innerHTML = `
+        <div class="index-head">
+          <div class="index-title"><h2>فهرست مصحف</h2><button type="button" class="index-close" aria-label="بستن"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+          <label class="index-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="جستجوی سوره یا شمارهٔ سوره…" autocomplete="off" enterkeyhint="search"></label>
+          <div class="index-tabs"><button type="button" data-tab="surah" class="on">سوره‌ها</button><button type="button" data-tab="juz">اجزاء</button></div>
+        </div>
+        <div class="index-list"></div>`;
+      document.body.appendChild(indexSheet);
+      indexSheet.querySelector(".index-close").addEventListener("click", () => closeIndexSheet());
+      indexSheet.querySelector("input").addEventListener("input", renderIndexList);
+      indexSheet.querySelectorAll("[data-tab]").forEach(btn => btn.addEventListener("click", () => {
+        indexTab = btn.dataset.tab;
+        indexSheet.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b === btn));
+        renderIndexList();
+      }));
+      indexSheet.querySelector(".index-list").addEventListener("click", e => {
+        const row = e.target.closest("[data-page]");
+        if (row) goToMushafPage(Number(row.dataset.page));
+      });
+    }
+    function renderIndexList(scrollToCurrent) {
+      if (!indexSheet) return;
+      const q = normSearch(indexSheet.querySelector("input").value);
+      const list = indexSheet.querySelector(".index-list");
+      const curSurah = currentSurahNumber();
+      const curJuz = Math.max(1, JUZ_STARTS.filter(st => st <= mushafPage).length);
+      let html = "";
+      if (indexTab === "surah") {
+        SURAH_NAMES.forEach((name, i) => {
+          const n = i + 1;
+          if (q && !(normSearch(name).includes(q) || String(n) === q)) return;
+          const page = SURAH_PAGES[n] || 1;
+          html += `<button type="button" class="index-row${n === curSurah ? " current" : ""}" data-page="${page}">
+            <span class="index-num">${faDigits(n)}</span>
+            <span class="index-main"><b>${name}</b><small>${MEDINAN_SURAHS.has(n) ? "مدنی" : "مکی"} · ${faDigits(SURAH_AYAHS[i])} آیه</small></span>
+            <span class="index-page">صفحهٔ ${faDigits(page)}</span></button>`;
+        });
+      } else {
+        JUZ_STARTS.forEach((start, i) => {
+          const n = i + 1;
+          const label = "الجزء " + JUZ_ORDINALS[i];
+          if (q && !(normSearch(label).includes(q) || String(n) === q)) return;
+          const firstSurah = mushafPageInfo(start).surah.replace("سورة ", "");
+          html += `<button type="button" class="index-row${n === curJuz ? " current" : ""}" data-page="${start}">
+            <span class="index-num">${faDigits(n)}</span>
+            <span class="index-main"><b>${label}</b><small>آغاز از سورهٔ ${firstSurah}</small></span>
+            <span class="index-page">صفحهٔ ${faDigits(start)}</span></button>`;
+        });
+      }
+      list.innerHTML = html || '<div class="index-empty">موردی پیدا نشد.</div>';
+      if (scrollToCurrent === true) {
+        const cur = list.querySelector(".current");
+        if (cur) cur.scrollIntoView({ block: "center" });
+      }
+    }
+    function openIndexSheet() {
+      if (!indexSheet) buildIndexSheet();
+      indexSheet.querySelector("input").value = "";
+      indexTab = "surah";
+      indexSheet.querySelectorAll("[data-tab]").forEach(b => b.classList.toggle("on", b.dataset.tab === "surah"));
+      renderIndexList(true);
+      sheetOpen = true;
+      pushLayer("sheet");
+      requestAnimationFrame(() => indexSheet.classList.add("open"));
+    }
+    function closeIndexSheet(fromPop) {
+      if (!indexSheet || !sheetOpen) return;
+      sheetOpen = false;
+      indexSheet.classList.remove("open");
+      if (!fromPop) popLayer("sheet");
+    }
+    function goToMushafPage(page) {
+      const hadReader = !!fullscreenWrap;
+      sheetOpen = false;
+      if (indexSheet) indexSheet.classList.remove("open");
+      showMushafPage(page);
+      if (hadReader) popLayer("sheet");   // back to the reader layer
+      else openFullscreen();              // the sheet layer becomes the reader layer
+    }
+    function updateMushafHome() {
+      const el = byId("mushafContinueInfo");
+      if (el) el.textContent = `صفحهٔ ${faDigits(mushafPage)} · ${mushafPageInfo(mushafPage).surah}`;
+    }
+    function mushafSay(message, kind) {
+      const statusEl = byId("mushafStatus");
+      if (statusEl) statusEl.textContent = message;
+      if (fullscreenToast) {
+        fullscreenToast.textContent = message;
+        fullscreenToast.classList.toggle("show", kind !== "ok");
+      }
+    }
+    let fullscreenToast = null;
     const RED_SOURCE_INDEX = 3;
     const MUSHAF_CROP_KEY = "suza-mushaf-crop";
     function mushafCropOn() {
@@ -1593,7 +1766,10 @@
     function setupMushaf() {
       let saved = 1;
       try { saved = Number(localStorage.getItem("suza-mushaf-last-page")) || 1; } catch {}
-      try { selectedMushafSource = Math.max(0, Math.min(MUSHAF_SOURCES.length - 1, Number(localStorage.getItem(MUSHAF_SOURCE_KEY)) || 0)); } catch { selectedMushafSource = 0; }
+      try {
+        const rawSource = localStorage.getItem(MUSHAF_SOURCE_KEY);
+        selectedMushafSource = rawSource === null ? RED_SOURCE_INDEX : Math.max(0, Math.min(MUSHAF_SOURCES.length - 1, Number(rawSource) || 0));
+      } catch { selectedMushafSource = RED_SOURCE_INDEX; }
       renderMushafSources();
       showMushafPage(saved);
       setupMushafSwipe();
@@ -1919,7 +2095,11 @@
 
     function calculateTodayMoon() {
       const statusId = "todayMoonStatus";
-      if (!checkAstronomy(statusId)) return;
+      if (!window.Astronomy) {
+        setMoonStatus(statusId, "در حال دریافت کتابخانهٔ نجومی…");
+        loadAstronomy(ok => { if (ok) calculateTodayMoon(); else setMoonStatus(statusId, "کتابخانهٔ نجومی دریافت نشد. اتصال اینترنت را بررسی کنید و دوباره بزنید."); });
+        return;
+      }
       setMoonStatus(statusId, "در حال محاسبه…");
       try {
         const now = new Date();
@@ -1942,7 +2122,11 @@
 
     function calculateNewMoon() {
       const statusId = "newMoonStatus";
-      if (!checkAstronomy(statusId)) return;
+      if (!window.Astronomy) {
+        setMoonStatus(statusId, "در حال دریافت کتابخانهٔ نجومی…");
+        loadAstronomy(ok => { if (ok) calculateNewMoon(); else setMoonStatus(statusId, "کتابخانهٔ نجومی دریافت نشد. اتصال اینترنت را بررسی کنید و دوباره بزنید."); });
+        return;
+      }
       setMoonStatus(statusId, "در حال محاسبه…");
       try {
         const now = new Date();
@@ -2034,9 +2218,32 @@
     });
 
     if ("serviceWorker" in navigator && location.protocol.startsWith("http")) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js").catch(console.error);
-      });
+      navigator.serviceWorker.register("./sw.js").catch(console.error);
+    }
+
+    // نیازهای اختیاری (فونت و کتابخانهٔ نجومی) فقط بعد از نمایش کامل برنامه و در پس‌زمینه گرفته می‌شوند
+    function loadWebFont() {
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = "https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap";
+      document.head.appendChild(link);
+    }
+    window.addEventListener("load", () => setTimeout(loadWebFont, 2500));
+
+    let astronomyLoading = null;
+    function loadAstronomy(callback) {
+      if (window.Astronomy) { if (callback) callback(true); return; }
+      if (!astronomyLoading) {
+        astronomyLoading = [];
+        const tag = document.createElement("script");
+        tag.src = "https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js";
+        tag.async = true;
+        const done = ok => { const q = astronomyLoading || []; astronomyLoading = null; q.forEach(fn => fn(ok)); };
+        tag.onload = () => done(true);
+        tag.onerror = () => done(false);
+        document.head.appendChild(tag);
+      }
+      if (callback) astronomyLoading.push(callback);
     }
 
     function init() {
