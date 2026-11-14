@@ -1,5 +1,5 @@
 // Service worker: lets the app open offline and load fast. Bump CACHE when you publish a new version.
-const CACHE = "suza-v4";
+const CACHE = "suza-v5";
 const SHELL = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./icon-512.png", "./icon-512-any.png"];
 const ASTRONOMY = "https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js";
 
