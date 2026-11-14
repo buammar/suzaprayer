@@ -162,6 +162,8 @@
     .offset-row { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; margin-top: 8px; font-size: .8rem; color: var(--muted); }
     .offset-row button { padding: 4px 14px; border-radius: 10px; font-size: 1.1rem; line-height: 1.3; }
     .offset-row b { min-width: 24px; text-align: center; color: var(--ink); direction: ltr; }
+    .progress { height: 10px; border-radius: 999px; background: var(--tint-2); overflow: hidden; margin-top: 8px; }
+    .progress i { display: block; height: 100%; width: 0; background: var(--primary); border-radius: 999px; transition: width .25s; }
     /* mushaf home + settings */
     .loader-only { position: absolute !important; width: 1px !important; height: 1px !important; overflow: hidden !important; opacity: 0 !important; pointer-events: none !important; padding: 0 !important; margin: 0 !important; border: 0 !important; }
     .mushaf-home { display: grid; gap: 10px; }
@@ -179,10 +181,28 @@
     .mushaf-settings[open] summary::after { content: "−"; }
 
     /* reader: top bar buttons + status toast */
-    .mushaf-fullscreen .fs-bar { grid-template-columns: auto 1fr auto 1fr auto; }
-    .fs-bar .fs-btn { pointer-events: auto; width: 38px; height: 38px; padding: 0; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.12); color: #fff; }
+    .mushaf-fullscreen .fs-bar { grid-template-columns: auto minmax(0,1fr) auto minmax(0,1fr) auto auto; gap: 5px; padding-inline: 10px; }
+    .fs-bar .fs-juz, .fs-bar .fs-surah { overflow: hidden; text-overflow: ellipsis; font-size: clamp(.74rem, 3.3vw, .95rem); }
+    .fs-bar .fs-btn { pointer-events: auto; width: 36px; height: 36px; padding: 0; border-radius: 12px; display: grid; place-items: center; background: rgba(255,255,255,.12); color: #fff; }
     .fs-bar .fs-btn:hover { background: rgba(255,255,255,.2); }
     .fs-bar .fs-btn svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .fs-bar .fs-night.on { background: rgba(255,255,255,.3); }
+    .fs-bar .fs-night.on svg { fill: currentColor; }
+    /* night reading: pages are inverted (dark background, light text), red names stay red */
+    .mushaf-fullscreen img { transition: filter .25s; }
+    .mushaf-fullscreen.night { background: #1b1b1f !important; }
+    .mushaf-fullscreen.night img { filter: invert(.9) hue-rotate(180deg); }
+    .mushaf-fullscreen.night .crop-frame.on { background: #1b1b1f; }
+    /* first-run download banner */
+    .load-banner { position: fixed; z-index: 60; left: 50%; transform: translateX(-50%) translateY(20px); opacity: 0; pointer-events: none;
+      bottom: calc(86px + env(safe-area-inset-bottom, 0px)); width: min(100% - 20px, 540px); padding: 12px 14px; border-radius: 18px;
+      background: var(--deep); color: #fff; box-shadow: 0 14px 30px -10px rgba(0,0,0,.45); transition: opacity .25s, transform .25s; }
+    .load-banner.show { opacity: 1; transform: translateX(-50%); pointer-events: auto; }
+    .load-banner .lb-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-weight: 700; font-size: .92rem; }
+    .load-banner .lb-pct { font-variant-numeric: tabular-nums; font-size: 1.05rem; }
+    .load-banner .lb-bar { height: 8px; margin-top: 10px; border-radius: 999px; background: rgba(255,255,255,.2); overflow: hidden; }
+    .load-banner .lb-bar i { display: block; height: 100%; width: 0; border-radius: 999px; background: var(--sand); transition: width .25s; }
+    .load-banner .lb-stop { margin-top: 8px; padding: 4px 12px; border-radius: 10px; font-size: .78rem; background: rgba(255,255,255,.14); color: #fff; }
     .mushaf-fullscreen .fs-status {
       position: fixed; z-index: 100001; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(20px);
       max-width: 88vw; padding: 9px 18px; border-radius: 999px; background: rgba(30,30,30,.9); color: #fff; font-size: .85rem; font-weight: 600;
@@ -388,7 +408,7 @@
     .mushaf-fullscreen .crop-frame.on img { height: calc(100% / var(--h)) !important; }
     .mushaf-fullscreen .fs-bar {
       position: fixed; top: 0; left: 0; right: 0; z-index: 100000; direction: rtl;
-      display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 6px;
+      display: grid; grid-template-columns: auto minmax(0,1fr) auto minmax(0,1fr) auto auto; align-items: center; gap: 5px;
       padding: calc(env(safe-area-inset-top, 0px) + 10px) 14px 10px;
       background: rgba(30,30,30,.93); color: #fff; font-weight: 700; font-size: clamp(.8rem, 3.5vw, 1rem); white-space: nowrap;
       transform: translateY(-100%); opacity: 0; pointer-events: none;
@@ -436,6 +456,11 @@
         <p id="prayerStatus" class="status"></p>
       </div>
 
+      <button type="button" id="homeContinueBtn" class="continue-btn" style="width:100%;margin-top:14px">
+        <span class="continue-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h7A3 3 0 0 1 12 7.5V20a2 2 0 0 0-2-2H2z"/><path d="M22 4.5h-7a3 3 0 0 0-3 3V20a2 2 0 0 1 2-2h8z"/></svg></span>
+        <span class="continue-text"><small>ادامهٔ قرآن از جایی که خواندید</small><b id="homeContinueInfo">—</b></span>
+      </button>
+
     </section>
 
     <section id="mushafPanel" class="hidden">
@@ -460,6 +485,13 @@
           <button type="button" class="secondary" id="redOffsetMinus" aria-label="یک برگ قبل">−</button>
           <b id="redOffsetValue">0</b>
           <button type="button" class="secondary" id="redOffsetPlus" aria-label="یک برگ بعد">+</button>
+        </div>
+        <div class="offline-box">
+          <h3 style="margin-top:18px">ذخیرهٔ مصحف برای استفاده بدون اینترنت</h3>
+          <p class="note">یک بار با اینترنت خوب همهٔ ۶۰۴ صفحه را در گوشی ذخیره کنید؛ بعد از آن قرآن بدون اینترنت خوانده می‌شود.</p>
+          <div class="progress"><i id="offlineBar"></i></div>
+          <div class="settings-row" style="margin-top:10px"><button type="button" id="offlineBtn">ذخیرهٔ ۶۰۴ صفحه در گوشی</button></div>
+          <p class="note" id="offlineStatus" aria-live="polite"></p>
         </div>
         <h3 style="margin-top:18px">منبع تصاویر صفحات</h3>
         <p class="note">انتخاب شما ذخیره می‌شود؛ اگر منبع در دسترس نباشد، برنامه منابع دیگر را امتحان می‌کند.</p>
@@ -877,13 +909,15 @@
       { name: "QuranHub · حفص", description: "منبع فعلی · صفحات مصحف", url: page => `https://cdn.jsdelivr.net/gh/QuranHub/quran-pages-images@main/ayat/hafs/${page}.png` },
       { name: "myQuran CDN", description: "منبع جایگزین ۱ · تصویر صفحات", url: page => `https://cdn.myquran.com/img/page/${page}.png` },
       { name: "Islam-DB · مصحف مدینه", description: "منبع جایگزین ۲ · تصویر صفحات", url: page => `https://quran.islam-db.com/data/pages/quranpages_1024/images/page${String(page).padStart(3, "0")}.png` },
-      { name: "مصحف مدینه · الله و رب قرمز", description: "منبع ۴ · لفظ جلاله، رب، رحمن و هو به رنگ قرمز", url: page => `https://iiif.archive.org/iiif/al-quran-with-allah-name-in-red-color-arabic%24${page + mushafRedOffset()}/full/1000,/0/default.jpg` }
+      { name: "مصحف مدینه · الله و رب قرمز", description: "منبع ۴ · لفظ جلاله، رب، رحمن و هو به رنگ قرمز", url: page => `https://iiif.archive.org/iiif/al-quran-with-allah-name-in-red-color-arabic%24${page + mushafRedOffset()}/full/1000,/0/default.jpg` },
+      { name: "مصحف مدینه · داخل برنامه", description: "منبع ۵ · همان مصحف قرمز، ذخیره‌شده در برنامه (بدون اینترنت)", url: page => `./mushaf/${String(page).padStart(3, "0")}.webp` }
     ];
+    const LOCAL_SOURCE_INDEX = 4;
     const MUSHAF_RED_OFFSET_KEY = "suza-mushaf-red-offset";
     function mushafRedOffset() {
       try { return Number(localStorage.getItem(MUSHAF_RED_OFFSET_KEY)) || 0; } catch { return 0; }
     }
-    const MUSHAF_SOURCE_KEY = "suza-mushaf-source-index";
+    const MUSHAF_SOURCE_KEY = "suza-mushaf-source-v2";
     let selectedMushafSource = 0;
 
     let settings = loadSettings();
@@ -1305,7 +1339,7 @@
       if (!image) return;
       clearTimeout(mushafLoadTimer);
       image.alt = `صفحهٔ ${next} مصحف شریف، روایت حفص`;
-      const order = [selectedMushafSource, ...MUSHAF_SOURCES.map((_, i) => i).filter(i => i !== selectedMushafSource)];
+      const order = [selectedMushafSource, ...[4, 3, 0, 1, 2].filter(i => i !== selectedMushafSource)];
       const cached = mushafCache.get(next);
       let attempt = 0;
       let currentIdx = selectedMushafSource;
@@ -1416,7 +1450,7 @@
 
       fullscreenBar = document.createElement("div");
       fullscreenBar.className = "fs-bar";
-      fullscreenBar.innerHTML = '<button type="button" class="fs-btn fs-list" aria-label="فهرست"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button><span class="fs-juz"></span><span class="fs-page"></span><span class="fs-surah"></span><button type="button" class="fs-btn fs-close" aria-label="خروج"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
+      fullscreenBar.innerHTML = '<button type="button" class="fs-btn fs-list" aria-label="فهرست"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></button><span class="fs-juz"></span><span class="fs-page"></span><span class="fs-surah"></span><button type="button" class="fs-btn fs-night" aria-label="مطالعه شب" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg></button><button type="button" class="fs-btn fs-close" aria-label="خروج"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button>';
       fullscreenWrap.appendChild(fullscreenBar);
       fullscreenToast = document.createElement("div");
       fullscreenToast.className = "fs-status";
@@ -1428,7 +1462,9 @@
         el.addEventListener("dblclick", e => e.stopPropagation());
       };
       bindBtn(fullscreenBar.querySelector(".fs-list"), openIndexSheet);
+      bindBtn(fullscreenBar.querySelector(".fs-night"), toggleNight);
       bindBtn(fullscreenBar.querySelector(".fs-close"), () => closeFullscreen());
+      applyNight();
       updateFsBar();
 
       function handleDoubleTap(e) {
@@ -1523,6 +1559,16 @@
     }
 
     function setupFullscreen() {
+      const offBtn = byId("offlineBtn");
+      if (offBtn) offBtn.addEventListener("click", downloadAllMushafPages);
+      refreshOfflineUi();
+      setTimeout(autoMushafStart, 2500);
+      window.addEventListener("online", () => autoMushafStart());
+      const homeCont = byId("homeContinueBtn");
+      if (homeCont) homeCont.addEventListener("click", () => {
+        const navBtn = document.querySelector('.bottom-nav [data-open="mushafPanel"]');
+        if (navBtn) navBtn.click(); else openFullscreen();
+      });
       const cont = byId("mushafContinueBtn");
       if (cont) cont.addEventListener("click", openFullscreen);
       const idx = byId("mushafIndexBtn");
@@ -1691,8 +1737,8 @@
       else openFullscreen();              // the sheet layer becomes the reader layer
     }
     function updateMushafHome() {
-      const el = byId("mushafContinueInfo");
-      if (el) el.textContent = `صفحهٔ ${faDigits(mushafPage)} · ${mushafPageInfo(mushafPage).surah}`;
+      const text = `صفحهٔ ${faDigits(mushafPage)} · ${mushafPageInfo(mushafPage).surah}`;
+      ["mushafContinueInfo", "homeContinueInfo"].forEach(id => { const el = byId(id); if (el) el.textContent = text; });
     }
     function mushafSay(message, kind) {
       const statusEl = byId("mushafStatus");
@@ -1703,7 +1749,118 @@
       }
     }
     let fullscreenToast = null;
+    /* ---------- ذخیرهٔ آفلاین مصحف (Cache Storage) ---------- */
+    const MUSHAF_CACHE = "suza-mushaf-v1";
+    const localPageUrl = p => new URL(`./mushaf/${String(p).padStart(3, "0")}.webp`, location.href).href;
+    let offlineRunning = false, offlineStop = false;
+    async function countSavedPages() {
+      if (!("caches" in window)) return 0;
+      try { return (await (await caches.open(MUSHAF_CACHE)).keys()).length; } catch { return 0; }
+    }
+    async function refreshOfflineUi(message) {
+      const n = await countSavedPages();
+      const bar = byId("offlineBar"), st = byId("offlineStatus"), btn = byId("offlineBtn");
+      if (bar) bar.style.width = Math.min(100, Math.round(n / 604 * 100)) + "%";
+      if (btn && !offlineRunning) btn.textContent = n >= 604 ? "✓ ذخیره‌شده — بررسی دوباره" : (n > 0 ? "ادامهٔ ذخیره" : "ذخیرهٔ ۶۰۴ صفحه در گوشی");
+      if (st) st.textContent = message || (n >= 604 ? "✓ همهٔ ۶۰۴ صفحه در گوشی ذخیره شده؛ مصحف بدون اینترنت کار می‌کند." : (n > 0 ? `${faDigits(n)} از ۶۰۴ صفحه ذخیره شده است.` : "هنوز صفحه‌ای ذخیره نشده است."));
+    }
+    let loadBanner = null, loadBannerTimer = null;
+    function ensureBanner() {
+      if (loadBanner) return loadBanner;
+      loadBanner = document.createElement("div");
+      loadBanner.className = "load-banner";
+      loadBanner.innerHTML = '<div class="lb-row"><span class="lb-text">در حال بارگذاری صفحات مصحف شریف در گوشی…</span><span class="lb-pct">٪۰</span></div><div class="lb-bar"><i></i></div><button type="button" class="lb-stop">توقف (ادامه در ورود بعدی)</button>';
+      document.body.appendChild(loadBanner);
+      loadBanner.querySelector(".lb-stop").addEventListener("click", () => { offlineStop = true; });
+      return loadBanner;
+    }
+    function showBanner(done, text) {
+      const el = ensureBanner();
+      clearTimeout(loadBannerTimer);
+      const pct = Math.min(100, Math.round(done / 604 * 100));
+      el.querySelector(".lb-pct").textContent = "٪" + faDigits(pct);
+      el.querySelector(".lb-bar i").style.width = pct + "%";
+      if (text) el.querySelector(".lb-text").textContent = text;
+      el.classList.add("show");
+    }
+    function hideBanner(delay) {
+      if (!loadBanner) return;
+      clearTimeout(loadBannerTimer);
+      loadBannerTimer = setTimeout(() => { if (loadBanner) loadBanner.classList.remove("show"); }, delay || 0);
+    }
+
+    async function downloadAllMushafPages(auto) {
+      const btn = byId("offlineBtn");
+      if (offlineRunning) { if (auto !== true) offlineStop = true; return; }
+      if (!("caches" in window)) { if (auto !== true) refreshOfflineUi("این مرورگر ذخیرهٔ آفلاین را پشتیبانی نمی‌کند."); return; }
+      offlineRunning = true; offlineStop = false;
+      if (btn) btn.textContent = "توقف";
+      try { if (navigator.storage && navigator.storage.persist) await navigator.storage.persist(); } catch {}
+      let failed = 0, missing = false, quota = false, done = 0;
+      try {
+        const cache = await caches.open(MUSHAF_CACHE);
+        const have = new Set((await cache.keys()).map(r => r.url));
+        const queue = [];
+        for (let p = 1; p <= 604; p++) { if (have.has(localPageUrl(p))) done++; else queue.push(p); }
+        if (queue.length) {
+          showBanner(done, "در حال بارگذاری صفحات مصحف شریف در گوشی…");
+          const worker = async () => {
+            while (queue.length && !offlineStop) {
+              const p = queue.shift();
+              try {
+                const ctrl = new AbortController();
+                const timer = setTimeout(() => ctrl.abort(), 40000);
+                let r;
+                try { r = await fetch(localPageUrl(p), { signal: ctrl.signal, cache: "no-cache" }); } finally { clearTimeout(timer); }
+                if (r.status === 404) { missing = true; offlineStop = true; break; }
+                if (!r.ok) throw new Error("HTTP " + r.status);
+                await cache.put(localPageUrl(p), r);
+                done++;
+                showBanner(done);
+                if (done % 8 === 0) refreshOfflineUi("در حال ذخیره…");
+              } catch (e) {
+                if (e && e.name === "QuotaExceededError") { quota = true; offlineStop = true; break; }
+                failed++;
+              }
+            }
+          };
+          await Promise.all([worker(), worker(), worker(), worker()]);
+        }
+      } catch (e) { console.error(e); failed++; }
+      offlineRunning = false;
+      let msg = null;
+      if (done >= 604) { showBanner(604, "✓ صفحات مصحف شریف در گوشی ذخیره شد"); hideBanner(3500); }
+      else if (missing) { hideBanner(0); msg = "فایل‌های مصحف روی میزبان پیدا نشد؛ ابتدا پوشهٔ mushaf را کنار برنامه آپلود کنید."; }
+      else if (quota) { hideBanner(0); msg = "فضای گوشی برای ذخیرهٔ مصحف کافی نیست."; }
+      else if (offlineStop) { hideBanner(0); }
+      else if (failed) { showBanner(done, "اتصال ناقص است؛ با برقرار شدن اینترنت ادامه می‌یابد…"); msg = `${faDigits(failed)} صفحه ذخیره نشد (اینترنت ضعیف)؛ دوباره «ادامهٔ ذخیره» را بزنید.`; }
+      offlineStop = false;
+      refreshOfflineUi(msg);
+    }
+    // اولین ورود (و هر ورودی که هنوز کامل نشده): دانلود خودکار صفحات
+    async function autoMushafStart() {
+      if (offlineRunning || navigator.onLine === false) return;
+      if (await countSavedPages() >= 604) return;
+      downloadAllMushafPages(true);
+    }
+
+    /* ---------- مطالعهٔ شب ---------- */
+    const NIGHT_KEY = "suza-mushaf-night";
+    function nightOn() { try { return localStorage.getItem(NIGHT_KEY) === "1"; } catch { return false; } }
+    function applyNight() {
+      if (!fullscreenWrap) return;
+      const on = nightOn();
+      fullscreenWrap.classList.toggle("night", on);
+      const b = fullscreenBar && fullscreenBar.querySelector(".fs-night");
+      if (b) { b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); }
+    }
+    function toggleNight() {
+      try { localStorage.setItem(NIGHT_KEY, nightOn() ? "0" : "1"); } catch {}
+      applyNight();
+    }
+
     const RED_SOURCE_INDEX = 3;
+    const isRedSource = i => i === 3 || i === 4;
     const MUSHAF_CROP_KEY = "suza-mushaf-crop";
     function mushafCropOn() {
       try { return localStorage.getItem(MUSHAF_CROP_KEY) !== "0"; } catch { return true; }
@@ -1711,7 +1868,7 @@
     const CROP = { L: .152, R: .148, T: .108, B: .099 };
     // pages 1 and 2 (Al-Fatiha / start of Al-Baqarah) have a different, fully decorated layout: never cropped
     function mushafCropActive() {
-      return selectedMushafSource === RED_SOURCE_INDEX && mushafCropOn() && mushafPage > 2;
+      return isRedSource(selectedMushafSource) && mushafCropOn() && mushafPage > 2;
     }
     function cropFrameFor(img, frame) {
       if (!frame) return;
@@ -1731,7 +1888,7 @@
       if (fullscreenWrap) fullscreenWrap.classList.toggle("cropped", on);
       const btn = byId("mushafCropBtn");
       if (btn) {
-        btn.classList.toggle("hidden", selectedMushafSource !== RED_SOURCE_INDEX);
+        btn.classList.toggle("hidden", !isRedSource(selectedMushafSource));
         btn.textContent = mushafCropOn() ? "حذف حاشیه: روشن" : "حذف حاشیه: خاموش";
         btn.setAttribute("aria-pressed", String(mushafCropOn()));
       }
@@ -1768,8 +1925,8 @@
       try { saved = Number(localStorage.getItem("suza-mushaf-last-page")) || 1; } catch {}
       try {
         const rawSource = localStorage.getItem(MUSHAF_SOURCE_KEY);
-        selectedMushafSource = rawSource === null ? RED_SOURCE_INDEX : Math.max(0, Math.min(MUSHAF_SOURCES.length - 1, Number(rawSource) || 0));
-      } catch { selectedMushafSource = RED_SOURCE_INDEX; }
+        selectedMushafSource = rawSource === null ? LOCAL_SOURCE_INDEX : Math.max(0, Math.min(MUSHAF_SOURCES.length - 1, Number(rawSource) || 0));
+      } catch { selectedMushafSource = LOCAL_SOURCE_INDEX; }
       renderMushafSources();
       showMushafPage(saved);
       setupMushafSwipe();
