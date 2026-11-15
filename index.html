@@ -390,7 +390,7 @@
     /* crop frame: cuts the ornamental border off the red-mushaf pages */
     .crop-frame { display: contents; }
     .crop-frame.on {
-      --L: .152; --R: .148; --T: .108; --B: .099;
+      --L: .152; --R: .148; --T: .083; --B: .099;
       --w: calc(1 - var(--L) - var(--R)); --h: calc(1 - var(--T) - var(--B));
       display: block; position: relative; overflow: hidden; direction: ltr; background: #fff;
       aspect-ratio: var(--ar, .41); margin: 0 auto;
@@ -522,6 +522,75 @@
     html[data-theme="dark"] .volume-row input[type="range"] { background: linear-gradient(90deg, var(--rc1) var(--vol, 80%), #34423d var(--vol, 80%)); }
     html[data-theme="dark"] .surah-num { background: var(--surface); }
     html[data-theme="dark"] .index-close { color: var(--ink); }
+    /* ===== header: centred title + live clock ===== */
+    header { text-align: center; }
+    header h1 { margin: 0; }
+    .header-clock { margin-top: 6px; direction: ltr; font-size: clamp(2.2rem, 11vw, 3rem); font-weight: 800; line-height: 1.1; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+    .header-clock small { font-size: .45em; font-weight: 600; opacity: .8; margin-inline-start: 2px; }
+    #todayLine { justify-content: center; }
+
+    /* ===== calendar: nicer day cards ===== */
+    .cal-nav button { width: 44px; height: 44px; padding: 0; display: grid; place-items: center; }
+    .cal-nav svg, .td-nav svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+    .cal-grid { gap: 6px; }
+    .cal-cell { display: grid; grid-template-rows: auto 1fr auto; justify-items: center; align-items: center; aspect-ratio: 1 / 1.12; padding: 5px 3px 4px; border: 1px solid transparent; border-radius: 16px; background: var(--surface); box-shadow: 0 1px 2px rgba(16,40,34,.08); transition: transform .12s, box-shadow .15s; }
+    .cal-cell:hover { background: var(--tint); }
+    .cal-cell:active { transform: scale(.94); }
+    .cal-cell b { font-size: 1.14rem; line-height: 1; }
+    .cal-cell .cal-dot { width: 6px; height: 6px; border-radius: 50%; background: transparent; }
+    .cal-cell.has .cal-dot { background: var(--sand); }
+    .cal-cell.has::after { display: none; }
+    .cal-cell .cal-meta { display: flex; justify-content: space-between; width: 100%; padding: 0 3px; font-size: .58rem; font-style: normal; font-weight: 700; line-height: 1; }
+    .cal-cell .cal-h, .cal-cell .cal-g { position: static; font-style: normal; }
+    .cal-cell .cal-h { color: #b08a3e; } .cal-cell .cal-g { color: var(--muted); }
+    .cal-cell.fri b, .cal-cell.hol b { color: var(--bad); }
+    .cal-cell.hol { background: color-mix(in srgb, var(--bad) 10%, var(--surface)); }
+    .cal-cell.today { background: linear-gradient(160deg, var(--primary), color-mix(in srgb, var(--primary) 68%, #000)); border-color: transparent; box-shadow: 0 8px 16px -8px var(--primary); }
+    .cal-cell.today b, .cal-cell.today .cal-h, .cal-cell.today .cal-g { color: #fff; }
+    .cal-cell.today.has .cal-dot { background: var(--sand); }
+    .cal-cell.sel { outline: 2px solid var(--primary); outline-offset: 1px; }
+
+    /* ===== favourites ===== */
+    .fav-row { cursor: pointer; }
+    .fav-actions { display: flex; align-items: center; gap: 8px; }
+    .fav-del { padding: 2px 9px; border-radius: 10px; background: transparent; color: var(--muted); font-size: .9rem; }
+    .fav-del:hover { background: var(--tint); color: var(--bad); }
+    .fs-tools .fs-pill { flex: none; padding: 6px 12px; border-radius: 999px; background: rgba(201,164,92,.3); border: 1px solid rgba(201,164,92,.55); color: #fff; font-size: .78rem; font-weight: 700; white-space: nowrap; }
+    .fs-tools .fs-pill:hover { background: rgba(201,164,92,.42); } .fs-tools .fs-pill.back { background: rgba(255,255,255,.2); border-color: rgba(255,255,255,.35); }
+    .fs-tools input[type=range] { min-width: 0; }
+
+    /* ===== weather + tide ===== */
+    .sea-card { display: grid; grid-template-columns: 1fr 1px 1fr; gap: 12px; width: 100%; margin-top: 14px; padding: 14px 16px; text-align: right; color: var(--ink); font-weight: inherit; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); }
+    .sea-card:hover { background: var(--surface); }
+    .sea-sep { background: var(--line); }
+    .sea-col small { color: var(--muted); font-weight: 700; font-size: .8rem; }
+    .sea-big { display: flex; align-items: center; gap: 8px; margin-top: 2px; font-size: 1.55rem; font-weight: 800; }
+    .sea-big b { font-variant-numeric: tabular-nums; }
+    .sea-sub { display: block; margin-top: 2px; color: var(--muted); font-size: .78rem; font-weight: 600; }
+    .w-ico { width: 28px; height: 28px; flex: none; fill: none; stroke: var(--primary); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    html[data-theme="dark"] .w-ico { stroke: var(--soft); }
+    .tri { display: inline-block; width: 0; height: 0; border-left: 8px solid transparent; border-right: 8px solid transparent; }
+    .tri.up { border-bottom: 13px solid var(--good); } .tri.down { border-top: 13px solid var(--bad); }
+    .td-hdr { display: flex; align-items: center; gap: 14px; padding: 12px 18px; border-radius: 20px; border: 3px solid var(--line); background: var(--surface); }
+    .td-hdr .tri { border-left-width: 24px; border-right-width: 24px; } .td-hdr .tri.up { border-bottom-width: 36px; } .td-hdr .tri.down { border-top-width: 36px; }
+    .td-hdr b { margin-inline-start: auto; font-size: 1.9rem; font-weight: 800; direction: ltr; white-space: nowrap; } .td-hdr span { font-size: .8rem; color: var(--muted); font-weight: 600; max-width: 38%; }
+    .td-nav { display: grid; grid-template-columns: 44px 1fr 44px; align-items: center; gap: 8px; margin-top: 12px; text-align: center; font-size: .95rem; }
+    .td-nav button { height: 40px; padding: 0; display: grid; place-items: center; }
+    .td-chart { margin-top: 10px; padding: 8px 6px 2px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+    .td-chart svg { width: 100%; display: block; }
+    .td-grid { stroke: var(--line); stroke-width: 1; } .td-h { fill: var(--muted); font-size: 11px; }
+    .td-line { fill: none; stroke: #0369a1; stroke-width: 2.5; } .td-now { stroke: var(--ink); stroke-width: 1.5; }
+    .td-dot { fill: #e5e7eb; stroke: #6b7280; stroke-width: 2; } .td-pt { fill: #fff; stroke: #0369a1; stroke-width: 2; }
+    .td-t { fill: var(--ink); font-size: 12px; font-weight: 700; direction: ltr; unicode-bidi: isolate; } .td-v { fill: var(--muted); font-size: 11px; direction: ltr; unicode-bidi: isolate; }
+    .td-row { display: grid; grid-template-columns: 22px 1fr auto auto; gap: 10px; align-items: center; margin-top: 6px; padding: 9px 12px; border-radius: 12px; background: var(--tint); font-size: .9rem; }
+    .td-row span { font-weight: 800; font-variant-numeric: tabular-nums; } .td-row em { font-style: normal; color: var(--muted); font-weight: 700; min-width: 64px; text-align: left; }
+    .td-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; } .td-meta span { padding: 4px 12px; border-radius: 999px; background: var(--tint); font-size: .82rem; font-weight: 700; }
+    .w-now { display: flex; align-items: center; gap: 14px; } .w-now .w-ico { width: 64px; height: 64px; } .w-now b { display: block; font-size: 2.6rem; line-height: 1.1; } .w-now span { color: var(--muted); font-weight: 600; }
+    .w-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+    .w-grid div { padding: 10px 12px; border-radius: 14px; background: var(--tint); } .w-grid small { display: block; color: var(--muted); font-weight: 700; font-size: .78rem; } .w-grid b { font-size: 1.1rem; } .w-grid em { font-style: normal; color: var(--muted); font-size: .78rem; margin-inline-start: 6px; }
+    .wh-row { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; } .wh { flex: none; display: grid; justify-items: center; gap: 4px; min-width: 58px; padding: 8px 6px; border-radius: 14px; background: var(--tint); } .wh small { color: var(--muted); font-size: .7rem; }
+    .wd-list { display: grid; gap: 6px; } .wd { display: grid; grid-template-columns: 74px 28px 1fr auto; gap: 8px; align-items: center; padding: 8px 12px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); }
+    .wd span { font-size: .84rem; color: var(--muted); } .wd em { font-style: normal; font-weight: 800; direction: ltr; font-size: .9rem; } .wd small { grid-column: 3 / -1; color: var(--muted); font-size: .72rem; margin-top: -4px; }
   </style>
 </head>
 
@@ -529,6 +598,7 @@
   <main class="container">
     <header>
       <h1>اوقات نماز سوزا</h1>
+      <div class="header-clock" id="headerClock" aria-label="ساعت"></div>
       <div id="todayLine" role="button" aria-label="باز کردن تقویم"><span class="chip main">در حال دریافت تاریخ…</span></div>
     </header>
 
@@ -562,6 +632,12 @@
         <p class="note">زمان اقامه بر اساس تأخیرهای تنظیم‌شده در تنظیمات محاسبه می‌شود.</p>
       </div>
 
+      <button type="button" class="sea-card" id="seaCard" aria-label="هواشناسی و جزر و مد">
+        <div class="sea-col" id="seaWeather"><small>هوا</small><div class="sea-big"><b>—</b></div><span class="sea-sub">در حال دریافت…</span></div>
+        <div class="sea-sep"></div>
+        <div class="sea-col" id="seaTide"><small>جزر و مد</small><div class="sea-big"><b>—</b></div><span class="sea-sub">در حال دریافت…</span></div>
+      </button>
+
       <div class="card">
         <h2>نمازهای امروز</h2>
         <div id="prayerGrid" class="prayer-grid">
@@ -572,7 +648,7 @@
 
       <button type="button" id="homeContinueBtn" class="continue-btn" style="width:100%;margin-top:14px">
         <span class="continue-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h7A3 3 0 0 1 12 7.5V20a2 2 0 0 0-2-2H2z"/><path d="M22 4.5h-7a3 3 0 0 0-3 3V20a2 2 0 0 1 2-2h8z"/></svg></span>
-        <span class="continue-text"><small>ادامهٔ قرآن از جایی که خواندید</small><b id="homeContinueInfo">—</b></span>
+        <span class="continue-text"><small>ادامهٔ ختم قرآن از جایی که خواندید</small><b id="homeContinueInfo">—</b></span>
       </button>
 
     </section>
@@ -583,10 +659,11 @@
       <div class="card mushaf-home">
         <button type="button" id="mushafContinueBtn" class="continue-btn">
           <span class="continue-ico"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 4.5h7A3 3 0 0 1 12 7.5V20a2 2 0 0 0-2-2H2z"/><path d="M22 4.5h-7a3 3 0 0 0-3 3V20a2 2 0 0 1 2-2h8z"/></svg></span>
-          <span class="continue-text"><small>ادامهٔ مطالعه</small><b id="mushafContinueInfo">—</b></span>
+          <span class="continue-text"><small>ادامهٔ ختم قرآن</small><b id="mushafContinueInfo">—</b></span>
         </button>
         <button type="button" id="mushafIndexBtn" class="secondary index-btn">فهرست سوره‌ها و اجزاء</button>
-        <p class="note">با یک ضربه روی صفحه، نوار ابزار (فهرست، مطالعهٔ شب، روشنایی، اشتراک) ظاهر می‌شود. برای ورق زدن بکشید و برای خروج دو ضربه بزنید.</p>
+        <button type="button" id="mushafFavBtn" class="secondary index-btn">★ پرکاربردها (کهف، یس، ملک، آیة الکرسی …)</button>
+        <p class="note">خواندن «پرکاربردها» صفحهٔ ختم شما را تغییر نمی‌دهد. با یک ضربه روی صفحه، نوار ابزار (فهرست، مطالعهٔ شب، روشنایی، اشتراک) ظاهر می‌شود. برای ورق زدن بکشید و برای خروج دو ضربه بزنید.</p>
       </div>
 
 
@@ -1398,13 +1475,14 @@
             if (el) el.classList.toggle("hidden", id !== target);
           });
           window.scrollTo({ top: 0, behavior: "smooth" });
-          if (target === "mushafPanel") { try { openFullscreen(); } catch (e) { console.error(e); } }
+          if (target === "mushafPanel") { try { openMainReader(); } catch (e) { console.error(e); } }
           if (target === "moonPanel") { try { loadAstronomy(); } catch {} }
         });
       });
     }
 
     let mushafPage = 1;
+    let readerMode = "main", mainPage = 1;   // main = صفحهٔ ختم؛ fav = پرکاربردها (جدا ذخیره می‌شود)
     let touchStartX = 0, touchStartY = 0, touchMoved = false;
 
     const mushafCache = new Map();     // page -> { url, idx } (loaded OK)
@@ -1475,7 +1553,8 @@
       image.onerror = () => { attempt += 1; tryLoad(); };
       image.onload = finish;
       tryLoad();
-      try { localStorage.setItem("suza-mushaf-last-page", String(next)); } catch {}
+      if (readerMode === "main") { mainPage = next; try { localStorage.setItem("suza-mushaf-last-page", String(next)); } catch {} }
+      else { try { localStorage.setItem("suza-mushaf-fav-page", String(next)); } catch {} }
     }
 
     /* ---------- جهت جابجایی: کشیدن به راست => صفحهٔ بعد، به چپ => صفحهٔ قبل ---------- */
@@ -1561,7 +1640,7 @@
         el.addEventListener("click", e => { e.stopPropagation(); fn(); });
         el.addEventListener("dblclick", e => e.stopPropagation());
       };
-      bindBtn(fullscreenBar.querySelector(".fs-list"), openIndexSheet);
+      bindBtn(fullscreenBar.querySelector(".fs-list"), () => { if (readerMode === "fav" && typeof openFavSheet === "function") openFavSheet(); else openIndexSheet(); });
       bindBtn(fullscreenBar.querySelector(".fs-night"), toggleNight);
       bindBtn(fullscreenBar.querySelector(".fs-close"), () => closeFullscreen());
       applyNight();
@@ -1622,7 +1701,7 @@
       });
 
       document.body.appendChild(fullscreenWrap);
-      if (history.state && history.state.layer === "sheet") { try { history.replaceState({ layer: "reader" }, ""); } catch {} }
+      if (history.state && (history.state.layer === "sheet" || history.state.layer === "ovl")) { try { history.replaceState({ layer: "reader" }, ""); } catch {} }
       else pushLayer("reader");
       fullscreenImage.addEventListener("load", applyMushafCrop);
       applyMushafCrop();
@@ -1671,7 +1750,7 @@
         if (navBtn) navBtn.click(); else openFullscreen();
       });
       const cont = byId("mushafContinueBtn");
-      if (cont) cont.addEventListener("click", openFullscreen);
+      if (cont) cont.addEventListener("click", openMainReader);
       const idx = byId("mushafIndexBtn");
       if (idx) idx.addEventListener("click", openIndexSheet);
       document.addEventListener("fullscreenchange", () => {
@@ -1718,7 +1797,7 @@
     function updateFsBar() {
       if (!fullscreenBar) return;
       const info = mushafPageInfo(mushafPage);
-      fullscreenBar.querySelector(".fs-juz").textContent = info.juz;
+      fullscreenBar.querySelector(".fs-juz").textContent = readerMode === "fav" ? "★ پرکاربرد" : info.juz;
       fullscreenBar.querySelector(".fs-page").textContent = String(mushafPage);
       fullscreenBar.querySelector(".fs-surah").textContent = info.surah;
     }
@@ -1746,6 +1825,7 @@
     function popLayer(name) { try { if (history.state && history.state.layer === name) { ignorePop++; history.back(); } } catch {} }
     window.addEventListener("popstate", () => {
       if (ignorePop > 0) { ignorePop--; return; }
+      if (window.overlayOpen && window.overlayOpen()) return;
       if (sheetOpen) closeIndexSheet(true);
       else if (fullscreenWrap) closeFullscreen(true);
     });
@@ -1765,7 +1845,7 @@
         <div class="index-head">
           <div class="index-title"><h2>فهرست مصحف</h2><button type="button" class="index-close" aria-label="بستن"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
           <label class="index-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="جستجوی سوره یا شمارهٔ سوره…" autocomplete="off" enterkeyhint="search"></label>
-          <div class="index-tabs three"><button type="button" data-tab="surah" class="on">سوره‌ها</button><button type="button" data-tab="juz">اجزاء</button><button type="button" data-tab="fav">پرکاربرد</button></div>
+          <div class="index-tabs"><button type="button" data-tab="surah" class="on">سوره‌ها</button><button type="button" data-tab="juz">اجزاء</button></div>
         </div>
         <div class="index-list"></div>`;
       document.body.appendChild(indexSheet);
@@ -1796,21 +1876,6 @@
           html += `<button type="button" class="index-row${n === curSurah ? " current" : ""}" data-page="${page}">
             <span class="index-num">${faDigits(n)}</span>
             <span class="index-main"><b>${name}</b><small>${MEDINAN_SURAHS.has(n) ? "مدنی" : "مکی"} · ${faDigits(SURAH_AYAHS[i])} آیه</small></span>
-            <span class="index-page">صفحهٔ ${faDigits(page)}</span></button>`;
-        });
-      } else if (indexTab === "fav") {
-        const FAV = [
-          ["آیة الکرسی", "سورهٔ بقره · آیهٔ ۲۵۵", 42],
-          ["دو آیهٔ پایانی بقره", "آیات ۲۸۵ و ۲۸۶", 49],
-          ["سورهٔ یس", "", SURAH_PAGES[36]], ["سورهٔ کهف", "", SURAH_PAGES[18]], ["سورهٔ ملک", "", SURAH_PAGES[67]],
-          ["سورهٔ الرحمن", "", SURAH_PAGES[55]], ["سورهٔ واقعه", "", SURAH_PAGES[56]], ["سورهٔ سجده", "", SURAH_PAGES[32]],
-          ["سورهٔ فاتحه", "", 1], ["اخلاص، فلق و ناس", "سه سورهٔ پایانی قرآن", 604]
-        ];
-        FAV.forEach(([name, sub, page], i) => {
-          if (q && !normSearch(name).includes(q)) return;
-          html += `<button type="button" class="index-row" data-page="${page}">
-            <span class="index-num">${faDigits(i + 1)}</span>
-            <span class="index-main"><b>${name}</b><small>${sub || "صفحهٔ شروع سوره"}</small></span>
             <span class="index-page">صفحهٔ ${faDigits(page)}</span></button>`;
         });
       } else {
@@ -1847,8 +1912,15 @@
       indexSheet.classList.remove("open");
       if (!fromPop) popLayer("sheet");
     }
+    function openMainReader() {
+      if (fullscreenWrap) return;
+      readerMode = "main";
+      if (mushafPage !== mainPage) showMushafPage(mainPage);
+      openFullscreen();
+    }
     function goToMushafPage(page) {
       const hadReader = !!fullscreenWrap;
+      if (!hadReader) readerMode = "main";
       sheetOpen = false;
       if (indexSheet) indexSheet.classList.remove("open");
       showMushafPage(page);
@@ -1856,7 +1928,7 @@
       else openFullscreen();              // the sheet layer becomes the reader layer
     }
     function updateMushafHome() {
-      const text = `صفحهٔ ${faDigits(mushafPage)} · ${mushafPageInfo(mushafPage).surah}`;
+      const text = `صفحهٔ ${faDigits(mainPage)} · ${mushafPageInfo(mainPage).surah}`;
       ["mushafContinueInfo", "homeContinueInfo"].forEach(id => { const el = byId(id); if (el) el.textContent = text; });
     }
     function mushafSay(message, kind) {
@@ -1984,7 +2056,7 @@
     function mushafCropOn() {
       try { return localStorage.getItem(MUSHAF_CROP_KEY) !== "0"; } catch { return true; }
     }
-    const CROP = { L: .152, R: .148, T: .108, B: .099 };
+    const CROP = { L: .152, R: .148, T: .083, B: .099 };
     // pages 1 and 2 (Al-Fatiha / start of Al-Baqarah) have a different, fully decorated layout: never cropped
     function mushafCropActive() {
       return isRedSource(selectedMushafSource) && mushafCropOn() && mushafPage > 2;
@@ -2598,8 +2670,9 @@
     el.classList.remove("open");
     if (el._onClose) { try { el._onClose(); } catch {} }
     setTimeout(() => el.remove(), 320);
-    if (!fromPop) { try { if (history.state && history.state.layer === "ovl") { ignoreOvl++; history.back(); } } catch {} }
+    if (!fromPop) { try { if (history.state && history.state.layer === "ovl") { ignoreOvl++; if (typeof ignorePop !== "undefined") ignorePop++; history.back(); } } catch {} }
   }
+  window.overlayOpen = () => stack.length > 0;
   window.addEventListener("popstate", () => {
     if (ignoreOvl > 0) { ignoreOvl--; return; }
     if (stack.length) closeOverlay(true);
@@ -2669,6 +2742,7 @@
     document.title = "اوقات نماز " + c.short;
     const sel = $("citySelect"); if (sel) sel.value = c.id;
     try { loadPrayerTimes(); loadDateHeader(); updateCountdown(); } catch (e) { console.error(e); }
+    if (persist && window.refreshSea) window.refreshSea(true);
   }
   function openCityPicker() {
     const cur = currentCity();
@@ -2732,7 +2806,7 @@
   let calFirst = null;
   function openCalendar() {
     calFirst = persianFirst(new Date());
-    const el = sheet("تقویم", { head: '<div class="cal-nav"><button type="button" class="secondary" id="calPrev" aria-label="ماه قبل">›</button><div class="cal-title"><b id="calTitle"></b><small id="calSub"></small></div><button type="button" class="secondary" id="calNext" aria-label="ماه بعد">‹</button></div><div class="cal-week"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span class="fri">ج</span></div>', body: '<div class="cal-grid" id="calGrid"></div><div class="cal-sel" id="calSel"></div><div id="calEvents"></div><p class="note" style="margin-top:14px">مناسبت‌های قمری بر پایهٔ تقویم ام‌القری محاسبه می‌شود و ممکن است با رؤیت هلال در ایران یک روز اختلاف داشته باشد؛ در تنظیمات می‌توانید «تنظیم تاریخ قمری» را تغییر دهید. تعطیلی‌های رسمی را با تقویم رسمی کشور تطبیق دهید.</p>' });
+    const el = sheet("تقویم", { head: '<div class="cal-nav"><button type="button" class="secondary" id="calPrev" aria-label="ماه قبل"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><div class="cal-title"><b id="calTitle"></b><small id="calSub"></small></div><button type="button" class="secondary" id="calNext" aria-label="ماه بعد"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button></div><div class="cal-week"><span>ش</span><span>ی</span><span>د</span><span>س</span><span>چ</span><span>پ</span><span class="fri">ج</span></div>', body: '<div class="cal-grid" id="calGrid"></div><div class="cal-sel" id="calSel"></div><div id="calEvents"></div><p class="note" style="margin-top:14px">مناسبت‌های قمری بر پایهٔ تقویم ام‌القری محاسبه می‌شود و ممکن است با رؤیت هلال در ایران یک روز اختلاف داشته باشد؛ در تنظیمات می‌توانید «تنظیم تاریخ قمری» را تغییر دهید. تعطیلی‌های رسمی را با تقویم رسمی کشور تطبیق دهید.</p>' });
     const draw = () => {
       const len = persianLen(calFirst), p0 = parts(calFirst, "persian");
       const last = new Date(calFirst.getTime() + (len - 1) * DAY);
@@ -2750,13 +2824,13 @@
         const ev = (P_EVENTS[p0.m + "-" + pd] || []).concat(H_EVENTS[h.m + "-" + h.d] || []);
         const hol = ev.some(e => e[1]), fri = (blanks + i) % 7 === 6;
         const today = todayP.y === p0.y && todayP.m === p0.m && todayP.d === pd;
-        cells += `<button type="button" class="cal-cell${today ? " today" : ""}${hol || fri ? " hol" : ""}${ev.length ? " has" : ""}" data-i="${i}"><b>${fa(pd)}</b><span class="cal-h">${fa(h.d)}</span><span class="cal-g">${g.d}</span></button>`;
+        cells += `<button type="button" class="cal-cell${today ? " today" : ""}${hol ? " hol" : ""}${fri ? " fri" : ""}${ev.length ? " has" : ""}" data-i="${i}"><span class="cal-dot"></span><b>${fa(pd)}</b><span class="cal-meta"><em class="cal-h">${fa(h.d)}</em><em class="cal-g">${g.d}</em></span></button>`;
         ev.forEach(e => { evHtml += `<div class="cal-event${e[1] ? " hol" : ""}"><b>${fa(pd)} ${PM[p0.m - 1]}</b><span>${e[0]}</span></div>`; });
       }
       el.querySelector("#calGrid").innerHTML = cells;
       el.querySelector("#calEvents").innerHTML = evHtml ? '<h3 style="margin:16px 0 8px">مناسبت‌های این ماه</h3>' + evHtml : '<p class="note" style="margin-top:14px">مناسبتی برای این ماه ثبت نشده است.</p>';
       const sel = el.querySelector("#calSel");
-      const showSel = i => { sel.textContent = fullDateLine(new Date(calFirst.getTime() + i * DAY)); };
+      const showSel = i => { sel.textContent = fullDateLine(new Date(calFirst.getTime() + i * DAY)); el.querySelectorAll(".cal-cell").forEach(c => c.classList.toggle("sel", Number(c.dataset.i) === i)); };
       showSel(todayP.y === p0.y && todayP.m === p0.m ? todayP.d - 1 : 0);
       el.querySelectorAll(".cal-cell").forEach(b => b.addEventListener("click", () => showSel(Number(b.dataset.i))));
     };
@@ -2895,7 +2969,7 @@
     let b = 100; try { b = Number(localStorage.getItem(BRIGHT_KEY)) || 100; } catch {}
     const tools = document.createElement("div");
     tools.className = "fs-tools";
-    tools.innerHTML = `<span class="fs-sun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><input type="range" class="fs-bright" min="35" max="100" value="${b}" aria-label="روشنایی صفحه"><button type="button" class="fs-btn fs-share" aria-label="اشتراک‌گذاری صفحه"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>`;
+    tools.innerHTML = `<span class="fs-sun"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg></span><input type="range" class="fs-bright" min="35" max="100" value="${b}" aria-label="روشنایی صفحه"><button type="button" class="fs-pill fs-mode">★ پرکاربردها</button><button type="button" class="fs-btn fs-share" aria-label="اشتراک‌گذاری صفحه"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 10.5l6.8-4M8.6 13.5l6.8 4"/></svg></button>`;
     fullscreenWrap.appendChild(tools);
     fullscreenWrap.style.setProperty("--bright", String(b / 100));
     ["touchstart", "touchmove", "touchend"].forEach(ev => tools.addEventListener(ev, e => e.stopPropagation(), { passive: true }));
@@ -2906,6 +2980,8 @@
       try { localStorage.setItem(BRIGHT_KEY, String(v)); } catch {}
     });
     tools.querySelector(".fs-share").addEventListener("click", sharePage);
+    tools.querySelector(".fs-mode").addEventListener("click", () => { if (readerMode === "fav") backToMain(); else openFavSheet(); });
+    refreshModeUi();
     if (fullscreenBar && fullscreenBar.classList.contains("show")) tools.classList.add("show");
   };
 
@@ -2949,6 +3025,270 @@
     apply(Number(m.value));
   }
 
+  /* ---------- ساعت در کارت بالا ---------- */
+  function initHeaderClock() {
+    const el = $("headerClock"); if (!el) return;
+    const f = new Intl.DateTimeFormat("en-GB", { timeZone: TIME_ZONE, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+    const tick = () => {
+      const p = {}; f.formatToParts(new Date()).forEach(x => { p[x.type] = x.value; });
+      el.innerHTML = `${fa(p.hour)}:${fa(p.minute)}<small>:${fa(p.second)}</small>`;
+    };
+    tick(); setInterval(tick, 1000);
+  }
+
+  /* ---------- پرکاربردهای مصحف (جدا از صفحهٔ ختم) ---------- */
+  const FAV_KEY = "suza-mushaf-favs-v1";
+  const FAV_DEFAULT = [
+    { n: "آیة الکرسی", s: "سورهٔ بقره · آیهٔ ۲۵۵", p: 42 },
+    { n: "دو آیهٔ پایانی بقره", s: "آیات ۲۸۵ و ۲۸۶", p: 49 },
+    { n: "سورهٔ کهف", s: "مخصوص روز جمعه", u: 18 }, { n: "سورهٔ یس", u: 36 }, { n: "سورهٔ ملک", s: "پیش از خواب", u: 67 },
+    { n: "سورهٔ الرحمن", u: 55 }, { n: "سورهٔ واقعه", u: 56 }, { n: "سورهٔ سجده", u: 32 }, { n: "سورهٔ مزمل", u: 73 },
+    { n: "سورهٔ فاتحه", u: 1 }, { n: "اخلاص، فلق و ناس", s: "سه سورهٔ پایانی قرآن", p: 604 }
+  ];
+  function favList() {
+    try { const v = JSON.parse(localStorage.getItem(FAV_KEY)); if (Array.isArray(v)) return v; } catch {}
+    return FAV_DEFAULT.map(x => ({ ...x }));
+  }
+  function saveFavs(list) { try { localStorage.setItem(FAV_KEY, JSON.stringify(list)); } catch {} }
+  const favPage = it => it.p || SURAH_PAGES[it.u] || 1;
+
+  function refreshModeUi() {
+    const pill = fullscreenWrap && fullscreenWrap.querySelector(".fs-mode");
+    if (pill) {
+      pill.textContent = readerMode === "fav" ? `↩ بازگشت به ختم · ص ${fa(mainPage)}` : "★ پرکاربردها";
+      pill.classList.toggle("back", readerMode === "fav");
+    }
+    updateFsBar();
+  }
+  window.refreshModeUi = refreshModeUi;
+  function backToMain() { readerMode = "main"; showMushafPage(mainPage); refreshModeUi(); toast(`به صفحهٔ ختم برگشتید · صفحهٔ ${fa(mainPage)}`); }
+  window.backToMain = backToMain;
+
+  // با باز کردن یک مورد پرکاربرد، صفحهٔ ختم دست‌نخورده می‌ماند
+  function openFavorite(page) {
+    const hadReader = !!fullscreenWrap;
+    if (stack.length) closeOverlay(!hadReader);   // اگر مصحف باز نیست، لایهٔ تاریخچه به لایهٔ مصحف تبدیل می‌شود
+    readerMode = "fav";
+    showMushafPage(page);
+    if (!hadReader) openFullscreen();
+    refreshModeUi();
+  }
+  function openFavSheet() {
+    const el = sheet("پرکاربردهای مصحف", {
+      head: '<p class="note" style="margin:0 2px 4px">صفحهٔ ختم شما با خواندن این موارد تغییر نمی‌کند؛ بعد از خواندن، «بازگشت به ختم» را بزنید.</p>',
+      body: '<div id="favRows"></div><div style="display:grid;gap:8px;margin-top:10px"><button type="button" class="secondary" id="favAdd">＋ افزودن سوره</button><button type="button" class="secondary" id="favReset">بازگرداندن فهرست پیش‌فرض</button></div>'
+    });
+    const rows = el.querySelector("#favRows");
+    const draw = () => {
+      const list = favList();
+      rows.innerHTML = list.map((it, i) => `<div class="index-row fav-row" data-i="${i}"><span class="index-num">${fa(i + 1)}</span><span class="index-main"><b>${it.n}</b><small>${it.s || ("آغاز سوره · صفحهٔ " + fa(favPage(it)))}</small></span><span class="fav-actions"><span class="index-page">صفحهٔ ${fa(favPage(it))}</span><button type="button" class="fav-del" data-del="${i}" aria-label="حذف">✕</button></span></div>`).join("") || '<div class="index-empty">فهرست خالی است.</div>';
+    };
+    draw();
+    rows.addEventListener("click", e => {
+      const del = e.target.closest("[data-del]");
+      if (del) { const l = favList(); l.splice(Number(del.dataset.del), 1); saveFavs(l); draw(); return; }
+      const row = e.target.closest("[data-i]"); if (!row) return;
+      openFavorite(favPage(favList()[Number(row.dataset.i)]));
+    });
+    el.querySelector("#favReset").addEventListener("click", () => { saveFavs(FAV_DEFAULT.map(x => ({ ...x }))); draw(); });
+    el.querySelector("#favAdd").addEventListener("click", () => {
+      const pick = sheet("افزودن سوره", { head: '<label class="index-search"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input type="search" placeholder="جستجوی سوره…" autocomplete="off"></label>', body: "" });
+      const list = pick.querySelector(".index-list"), input = pick.querySelector("input");
+      const norm = t => String(t || "").replace(/[\u064B-\u065F\u0670\u0640]/g, "").replace(/[أإآٱ]/g, "ا").replace(/ة/g, "ه").replace(/ى/g, "ي").trim();
+      const render = () => {
+        const q = norm(input.value);
+        list.innerHTML = SURAH_NAMES.map((name, i) => ({ name, n: i + 1 })).filter(x => !q || norm(x.name).includes(q) || String(x.n) === q)
+          .map(x => `<button type="button" class="index-row" data-u="${x.n}"><span class="index-num">${fa(x.n)}</span><span class="index-main"><b>${x.name}</b><small>صفحهٔ ${fa(SURAH_PAGES[x.n])}</small></span><span class="index-page">＋</span></button>`).join("");
+      };
+      input.addEventListener("input", render); render();
+      list.addEventListener("click", e => {
+        const row = e.target.closest("[data-u]"); if (!row) return;
+        const u = Number(row.dataset.u), l = favList();
+        if (!l.some(x => x.u === u)) { l.push({ n: "سورهٔ " + SURAH_NAMES[u - 1], u }); saveFavs(l); }
+        closeOverlay(); draw(); toast("به پرکاربردها اضافه شد");
+      });
+      openOverlay(pick);
+    });
+    openOverlay(el);
+  }
+  window.openFavSheet = openFavSheet;
+
+  /* ---------- هواشناسی و جزر و مد ---------- */
+  const SEA_KEY = "suza-sea-cache-v2";
+  const sCache = () => { try { return JSON.parse(localStorage.getItem(SEA_KEY)) || {}; } catch { return {}; } };
+  async function getJson(url, ms) {
+    const c = new AbortController(), t = setTimeout(() => c.abort(), ms);
+    try { const r = await fetch(url, { signal: c.signal }); if (!r.ok) throw new Error("HTTP " + r.status); return await r.json(); } finally { clearTimeout(t); }
+  }
+  const hasTide = m => m && m.hourly && Array.isArray(m.hourly.sea_level_height_msl) && m.hourly.sea_level_height_msl.some(v => v !== null);
+  async function loadSea(force) {
+    const c = currentCity(), cache = sCache();
+    const same = cache.city === c.id;
+    if (!force && same && cache.t && Date.now() - cache.t < 40 * 60000) return cache;
+    const wUrl = `https://api.open-meteo.com/v1/forecast?latitude=${c.lat}&longitude=${c.lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m,wind_direction_10m,surface_pressure&hourly=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,wind_speed_10m_max&timezone=Asia%2FTehran&forecast_days=7`;
+    const mUrl = (la, lo) => `https://marine-api.open-meteo.com/v1/marine?latitude=${la}&longitude=${lo}&hourly=sea_level_height_msl,wave_height,wave_period,sea_surface_temperature&timezone=Asia%2FTehran&forecast_days=7`;
+    const wP = getJson(wUrl, 15000);
+    const mP = (async () => {
+      const pts = same && cache.seaPt ? [cache.seaPt] : [];
+      pts.push([c.lat, c.lng]);
+      [[0, .12], [-.12, 0], [0, -.12], [.12, 0], [.12, .12], [-.12, -.12], [-.12, .12], [.12, -.12], [0, .25], [-.25, 0]].forEach(d => pts.push([+(c.lat + d[0]).toFixed(3), +(c.lng + d[1]).toFixed(3)]));
+      for (const pt of pts) { try { const m = await getJson(mUrl(pt[0], pt[1]), 15000); if (hasTide(m)) { m._pt = pt; return m; } } catch (e) { if (pt === pts[0] && e.name === "AbortError") throw e; } }
+      throw new Error("no marine data");
+    })();
+    const [w, m] = await Promise.allSettled([wP, mP]);
+    const next = {
+      city: c.id, t: Date.now(),
+      weather: w.status === "fulfilled" ? w.value : (same ? cache.weather : null),
+      marine: m.status === "fulfilled" ? m.value : (same ? cache.marine : null),
+      seaPt: m.status === "fulfilled" ? m.value._pt : (same ? cache.seaPt : null),
+      errW: w.status !== "fulfilled", errM: m.status !== "fulfilled"
+    };
+    try { localStorage.setItem(SEA_KEY, JSON.stringify(next)); } catch {}
+    return next;
+  }
+  const TZ_OFF = "+03:30";
+  const toDate = s => new Date(s + (s.length === 16 ? ":00" : "") + TZ_OFF);
+  const sg = v => (v >= 0 ? "+" : "−") + fa(Math.abs(v).toFixed(2)).replace(".", "٫");
+  const num = (v, d) => fa(Number(v).toFixed(d)).replace(".", "٫");
+  function wcode(c) {
+    if (c === 0) return ["صاف", "sun"]; if (c === 1) return ["عمدتاً صاف", "sun"]; if (c === 2) return ["نیمه‌ابری", "part"]; if (c === 3) return ["ابری", "cloud"];
+    if (c === 45 || c === 48) return ["مه‌آلود", "fog"]; if (c >= 51 && c <= 57) return ["نم‌نم باران", "rain"]; if (c >= 61 && c <= 67) return ["باران", "rain"];
+    if (c >= 71 && c <= 77) return ["برف", "snow"]; if (c >= 80 && c <= 82) return ["رگبار", "rain"]; if (c === 85 || c === 86) return ["رگبار برف", "snow"]; if (c >= 95) return ["رعد و برق", "storm"];
+    return ["نامشخص", "cloud"];
+  }
+  function wIcon(kind) {
+    const cloud = '<path d="M7 18h10a4 4 0 0 0 .6-7.95A5.5 5.5 0 0 0 7 9.5 4.25 4.25 0 0 0 7 18z"/>';
+    const m = {
+      sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M2.5 12h2M19.5 12h2M5.3 5.3l1.4 1.4M17.3 17.3l1.4 1.4M5.3 18.7l1.4-1.4M17.3 6.7l1.4-1.4"/>',
+      part: '<circle cx="8" cy="8" r="3"/><path d="M8 2v1.5M2 8h1.5M3.8 3.8l1 1M12.2 3.8l-1 1"/><path d="M9 20h8a3.5 3.5 0 0 0 .5-6.96A4.8 4.8 0 0 0 9 13a3.5 3.5 0 0 0 0 7z"/>',
+      cloud: cloud, fog: '<path d="M4 9h16M3 13h14M6 17h14"/>',
+      rain: cloud + '<path d="M9 20l-.7 2M13 20l-.7 2M17 20l-.7 2"/>', snow: cloud + '<path d="M9 21h.01M13 21h.01M17 21h.01"/>',
+      storm: cloud + '<path d="M12 14l-2 4h3l-1.5 4"/>'
+    };
+    return `<svg viewBox="0 0 24 24" class="w-ico">${m[kind] || m.cloud}</svg>`;
+  }
+  // سطح دریا: نقاط ساعتی + قله‌ها و دره‌ها با درون‌یابی
+  function tidePoints(marine) {
+    const t = marine.hourly.time, v = marine.hourly.sea_level_height_msl, pts = [];
+    for (let i = 0; i < t.length; i++) if (v[i] !== null && v[i] !== undefined) pts.push({ t: toDate(t[i]).getTime(), v: v[i], i });
+    return pts;
+  }
+  function levelAt(pts, ms) {
+    if (!pts.length || ms < pts[0].t || ms > pts[pts.length - 1].t) return null;
+    let k = pts.findIndex(p => p.t > ms); if (k <= 0) k = 1;
+    const a = pts[k - 1], b = pts[k], u = (ms - a.t) / (b.t - a.t), s = (1 - Math.cos(Math.PI * u)) / 2;
+    return a.v + (b.v - a.v) * s;
+  }
+  function extremes(pts) {
+    const out = [];
+    for (let i = 1; i < pts.length - 1; i++) {
+      const a = pts[i - 1].v, b = pts[i].v, c = pts[i + 1].v;
+      const hi = b >= a && b > c, lo = b <= a && b < c;
+      if (!hi && !lo) continue;
+      const den = a - 2 * b + c; const d = den === 0 ? 0 : 0.5 * (a - c) / den;
+      out.push({ hi, t: pts[i].t + d * 3600000, v: b - 0.25 * (a - c) * d });
+    }
+    return out;
+  }
+  const hhmm = ms => { const p = {}; new Intl.DateTimeFormat("en-GB", { timeZone: TIME_ZONE, hour: "2-digit", minute: "2-digit", hourCycle: "h23" }).formatToParts(new Date(ms)).forEach(x => { p[x.type] = x.value; }); return fa(p.hour + ":" + p.minute); };
+
+  let seaState = null, seaTimer = null;
+  async function refreshSea(force) {
+    const card = $("seaCard"); if (!card) return;
+    try { seaState = await loadSea(force); } catch (e) { seaState = sCache(); }
+    renderSeaCard();
+  }
+  function currentWeather(s) {
+    const c = s && s.weather && s.weather.current; if (!c) return null;
+    const [txt, kind] = wcode(c.weather_code); return { c, txt, kind };
+  }
+  function renderSeaCard() {
+    const w = $("seaWeather"), t = $("seaTide"); if (!w || !t) return;
+    const cw = currentWeather(seaState);
+    if (cw) w.innerHTML = `<small>هوا</small><div class="sea-big">${wIcon(cw.kind)}<b>${num(cw.c.temperature_2m, 0)}°</b></div><span class="sea-sub">${cw.txt} · باد ${num(cw.c.wind_speed_10m, 0)} km/h</span>`;
+    else w.innerHTML = `<small>هوا</small><div class="sea-big"><b>—</b></div><span class="sea-sub">${seaState && seaState.errW ? "دریافت نشد؛ لمس کنید" : "در حال دریافت…"}</span>`;
+    if (seaState && seaState.marine && hasTide(seaState.marine)) {
+      const pts = tidePoints(seaState.marine), now = Date.now(), lv = levelAt(pts, now), nx = levelAt(pts, now + 1800000);
+      const ex = extremes(pts).filter(e => e.t > now)[0];
+      if (lv !== null) {
+        const up = nx !== null && nx > lv;
+        t.innerHTML = `<small>جزر و مد</small><div class="sea-big"><i class="tri ${up ? "up" : "down"}"></i><b dir="ltr">${sg(lv)} m</b></div><span class="sea-sub">${up ? "در حال مد" : "در حال جزر"}${ex ? ` · ${ex.hi ? "مد" : "جزر"} ${hhmm(ex.t)}` : ""}</span>`;
+        return;
+      }
+    }
+    t.innerHTML = `<small>جزر و مد</small><div class="sea-big"><b>—</b></div><span class="sea-sub">${seaState && seaState.errM ? "دریافت نشد؛ لمس کنید" : "در حال دریافت…"}</span>`;
+  }
+
+  function openSea(startTab) {
+    let tab = startTab || "tide", dayOff = 0;
+    const el = sheet("هواشناسی و جزر و مد", {
+      head: '<div class="index-tabs" style="margin-top:2px"><button type="button" data-st="tide" class="on">جزر و مد</button><button type="button" data-st="weather">هواشناسی</button></div>',
+      body: '<div id="seaBody"></div>'
+    });
+    const body = el.querySelector("#seaBody");
+    const dayRange = off => { const base = noonOf(new Date()).getTime() + off * DAY; const p = parts(new Date(base), "gregory"); const s0 = Date.UTC(p.y, p.m - 1, p.d, 0, 0) - 12600000; return [s0, s0 + DAY, new Date(base)]; };
+    const stale = () => seaState && seaState.t ? `<p class="note">آخرین دریافت: ${hhmm(seaState.t)}${Date.now() - seaState.t > 3600000 ? " (قدیمی؛ برای به‌روزرسانی اینترنت لازم است)" : ""}</p>` : "";
+    const renderTide = () => {
+      const m = seaState && seaState.marine;
+      if (!hasTide(m)) { body.innerHTML = `<p class="note">${seaState && seaState.errM ? "داده‌های جزر و مد دریافت نشد (اینترنت یا دسترسی به سرور)." : "در حال دریافت…"}</p><button type="button" id="seaRetry">تلاش دوباره</button>`; body.querySelector("#seaRetry").addEventListener("click", async () => { body.innerHTML = '<p class="note">در حال دریافت…</p>'; await refreshSea(true); renderTide(); }); return; }
+      const pts = tidePoints(m), now = Date.now(), [d0, d1, dd] = dayRange(dayOff);
+      const ex = extremes(pts).filter(e => e.t >= d0 && e.t < d1);
+      const dayPts = pts.filter(p => p.t >= d0 - 3600000 && p.t <= d1 + 3600000);
+      const vals = dayPts.map(p => p.v); const vmin = Math.min(...vals), vmax = Math.max(...vals), pad = Math.max(0.12, (vmax - vmin) * 0.22);
+      const lo = vmin - pad, hi = vmax + pad, W = 360, H = 230, X = ms => (ms - d0) / DAY * W, Y = v => 20 + (1 - (v - lo) / (hi - lo)) * (H - 40);
+      let path = "", first = true;
+      for (let ms = d0; ms <= d1; ms += 600000) { const v = levelAt(pts, ms); if (v === null) continue; path += (first ? "M" : "L") + X(ms).toFixed(1) + " " + Y(v).toFixed(1) + " "; first = false; }
+      const area = path + `L${W} ${H} L0 ${H} Z`;
+      let marks = "", nowSvg = "";
+      ex.forEach(e => { const x = X(e.t), y = Y(e.v); marks += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3.5" class="td-pt"/><text x="${Math.min(W - 34, Math.max(34, x)).toFixed(1)}" y="${(e.hi ? y - 20 : y + 26).toFixed(1)}" class="td-t" text-anchor="middle">${hhmm(e.t)}</text><text x="${Math.min(W - 34, Math.max(34, x)).toFixed(1)}" y="${(e.hi ? y - 7 : y + 39).toFixed(1)}" class="td-v" text-anchor="middle">${sg(e.v)}</text>`; });
+      let hdr = "";
+      const isToday = dayOff === 0, lv = levelAt(pts, now);
+      if (isToday && lv !== null) {
+        const x = X(now), y = Y(lv), up = levelAt(pts, now + 1800000) > lv;
+        nowSvg = `<line x1="${x.toFixed(1)}" y1="0" x2="${x.toFixed(1)}" y2="${H}" class="td-now"/><circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="6" class="td-dot"/>`;
+        hdr = `<div class="td-hdr"><i class="tri ${up ? "up" : "down"}"></i><b dir="ltr">${sg(lv)} m</b><span>${up ? "در حال مد (بالا آمدن آب)" : "در حال جزر (پایین رفتن آب)"}</span></div>`;
+      }
+      let grid = ""; for (let h = 0; h <= 24; h += 6) grid += `<line x1="${X(d0 + h * 3600000).toFixed(1)}" y1="0" x2="${X(d0 + h * 3600000).toFixed(1)}" y2="${H}" class="td-grid"/><text x="${X(d0 + h * 3600000).toFixed(1)}" y="${H + 16}" class="td-h" text-anchor="${h === 0 ? "start" : h === 24 ? "end" : "middle"}">${fa(String(h).padStart(2, "0"))}</text>`;
+      const sun = (() => { try { const dt = computePrayerDay(dd).timings; return `<span>🌅 طلوع ${fa(dt.Sunrise)}</span><span>🌇 غروب ${fa(dt.Sunset)}</span>`.replace(/🌅|🌇/g, ""); } catch { return ""; } })();
+      const idx = (() => { const k = pts.findIndex(p => p.t >= now); return k < 0 ? pts.length - 1 : k; })();
+      const wave = m.hourly.wave_height && m.hourly.wave_height[pts[idx].i], per = m.hourly.wave_period && m.hourly.wave_period[pts[idx].i], sst = m.hourly.sea_surface_temperature && m.hourly.sea_surface_temperature[pts[idx].i];
+      const dName = new Intl.DateTimeFormat("fa-IR", { timeZone: TIME_ZONE, weekday: "long", day: "numeric", month: "long" }).format(dd);
+      body.innerHTML = `${hdr}<div class="td-nav"><button type="button" class="secondary" id="tdPrev" aria-label="روز قبل"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button><b>${isToday ? "امروز · " : ""}${dName}</b><button type="button" class="secondary" id="tdNext" aria-label="روز بعد"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button></div>
+        <div class="td-chart"><svg viewBox="0 0 ${W} ${H + 24}"><defs><linearGradient id="tdg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#38bdf8" stop-opacity=".95"/><stop offset="1" stop-color="#0284c7" stop-opacity=".85"/></linearGradient></defs>${grid}<path d="${area}" fill="url(#tdg)" class="td-area"/><path d="${path}" class="td-line"/>${marks}${nowSvg}</svg></div>
+        <div class="td-list">${ex.map(e => `<div class="td-row ${e.hi ? "hi" : "lo"}"><i class="tri ${e.hi ? "up" : "down"}"></i><b>${e.hi ? "مد (بالاترین سطح)" : "جزر (پایین‌ترین سطح)"}</b><span>${hhmm(e.t)}</span><em dir="ltr">${sg(e.v)} m</em></div>`).join("") || '<p class="note">برای این روز قله‌ای ثبت نشده است.</p>'}</div>
+        <div class="td-meta">${sun}${wave != null ? `<span>موج ${num(wave, 1)} m${per != null ? " · " + num(per, 0) + " ث" : ""}</span>` : ""}${sst != null ? `<span>دمای آب ${num(sst, 0)}°</span>` : ""}</div>
+        ${stale()}<p class="note">ارتفاع نسبت به میانگین سطح دریا (MSL) است و از مدل جهانی Open-Meteo گرفته می‌شود؛ تقریبی است و برای دریانوردی و صید استفاده نشود. ساعت‌ها به وقت ایران است.</p>`;
+      body.querySelector("#tdPrev").addEventListener("click", () => { if (dayOff > 0) { dayOff--; renderTide(); } });
+      body.querySelector("#tdNext").addEventListener("click", () => { if (dayOff < 5) { dayOff++; renderTide(); } });
+    };
+    const renderWeather = () => {
+      const w = seaState && seaState.weather;
+      if (!w || !w.current) { body.innerHTML = `<p class="note">${seaState && seaState.errW ? "داده‌های هواشناسی دریافت نشد (اینترنت یا دسترسی به سرور)." : "در حال دریافت…"}</p><button type="button" id="seaRetry">تلاش دوباره</button>`; body.querySelector("#seaRetry").addEventListener("click", async () => { body.innerHTML = '<p class="note">در حال دریافت…</p>'; await refreshSea(true); renderWeather(); }); return; }
+      const c = w.current, [txt, kind] = wcode(c.weather_code), d = w.daily;
+      const dirs = ["شمال","شمال‌شرق","شرق","جنوب‌شرق","جنوب","جنوب‌غرب","غرب","شمال‌غرب"], wd = dirs[Math.round(c.wind_direction_10m / 45) % 8];
+      const hrs = []; const now = Date.now();
+      for (let i = 0; i < w.hourly.time.length && hrs.length < 12; i++) { const ms = toDate(w.hourly.time[i]).getTime(); if (ms >= now - 1800000) hrs.push(`<div class="wh"><small>${hhmm(ms)}</small>${wIcon(wcode(w.hourly.weather_code[i])[1])}<b>${num(w.hourly.temperature_2m[i], 0)}°</b></div>`); }
+      const days = d.time.map((dt, i) => { const nm = i === 0 ? "امروز" : new Intl.DateTimeFormat("fa-IR", { timeZone: TIME_ZONE, weekday: "long" }).format(new Date(dt + "T12:00:00" + TZ_OFF)); const [tx, kd] = wcode(d.weather_code[i]); return `<div class="wd"><b>${nm}</b>${wIcon(kd)}<span>${tx}</span><em>${num(d.temperature_2m_min[i], 0)}° / ${num(d.temperature_2m_max[i], 0)}°</em><small>${d.precipitation_probability_max[i] != null ? "بارش " + fa(d.precipitation_probability_max[i]) + "٪" : ""}</small></div>`; }).join("");
+      body.innerHTML = `<div class="w-now">${wIcon(kind)}<div><b>${num(c.temperature_2m, 0)}°</b><span>${txt}</span></div></div>
+        <div class="w-grid"><div><small>احساس دما</small><b>${num(c.apparent_temperature, 0)}°</b></div><div><small>رطوبت</small><b>${fa(Math.round(c.relative_humidity_2m))}٪</b></div><div><small>باد</small><b>${num(c.wind_speed_10m, 0)} km/h</b><em>${wd}</em></div><div><small>فشار</small><b>${fa(Math.round(c.surface_pressure))} hPa</b></div></div>
+        <h3 style="margin:16px 0 8px">ساعت‌های آینده</h3><div class="wh-row">${hrs.join("")}</div>
+        <h3 style="margin:16px 0 8px">پیش‌بینی ۷ روز</h3><div class="wd-list">${days}</div>${stale()}<p class="note">منبع: Open-Meteo. شهر: ${currentCity().short}</p>`;
+    };
+    const show = () => { el.querySelectorAll("[data-st]").forEach(b => b.classList.toggle("on", b.dataset.st === tab)); (tab === "tide" ? renderTide : renderWeather)(); };
+    el.querySelectorAll("[data-st]").forEach(b => b.addEventListener("click", () => { tab = b.dataset.st; show(); }));
+    show(); openOverlay(el);
+    refreshSea(true).then(show).catch(() => {});
+  }
+  function initSea() {
+    const card = $("seaCard"); if (!card) return;
+    card.addEventListener("click", () => openSea("tide"));
+    seaState = sCache(); if (seaState && seaState.city) renderSeaCard();
+    setTimeout(() => refreshSea(false), 1800);
+    seaTimer = setInterval(() => { renderSeaCard(); refreshSea(false); }, 5 * 60000);
+  }
+  window.refreshSea = refreshSea;
+
+
   /* ---------- راه‌اندازی ---------- */
   function setup() {
     applyThemeMode();
@@ -2956,6 +3296,8 @@
     if (cs) { cs.innerHTML = CITIES.map(c => `<option value="${c.id}">${c.name}</option>`).join(""); cs.addEventListener("change", () => { applyCity(cs.value, true); toast("شهر: " + currentCity().name); }); }
     const ts = $("themeSelect"); if (ts) ts.addEventListener("change", () => { try { localStorage.setItem(THEME_KEY, ts.value); } catch {} applyThemeMode(); });
     applyCity(currentCity().id, false);
+    initHeaderClock(); initSea();
+    { const fb = $("mushafFavBtn"); if (fb) fb.addEventListener("click", openFavSheet); }
     const bind = (id, fn) => { const b = $(id); if (b) b.addEventListener("click", fn); };
     bind("qaQibla", openQibla); bind("qaCalendar", openCalendar); bind("qaCity", openCityPicker); bind("qaShare", sharePrayerTimes);
     const tl = $("todayLine"); if (tl) tl.addEventListener("click", openCalendar);
