@@ -619,6 +619,84 @@
     html[data-theme="dark"] .sea-card .w-ico.k-sun { stroke: #fbbf24; } html[data-theme="dark"] .sea-card .w-ico.k-rain { stroke: #93c5fd; } html[data-theme="dark"] .sea-card .w-ico { stroke: var(--soft); }
     .w-now .w-ico.k-sun, .w-now .w-ico.k-part, .w-now .w-ico.k-cloud, .w-now .w-ico.k-fog, .w-now .w-ico.k-rain, .w-now .w-ico.k-snow, .w-now .w-ico.k-storm { stroke: #fff; fill: rgba(255,255,255,.2); }
     .store-info { margin: 4px 2px 0; text-align: center; color: var(--muted); font-size: .76rem; }
+
+    /* ===== visual polish ===== */
+    body { background:
+      radial-gradient(520px 320px at 100% -40px, color-mix(in srgb, var(--primary) 16%, transparent), transparent 70%),
+      radial-gradient(460px 300px at -20px 120px, color-mix(in srgb, var(--sand) 18%, transparent), transparent 70%),
+      var(--background); background-attachment: fixed; }
+    html[data-theme="dark"] body { background:
+      radial-gradient(520px 320px at 100% -40px, color-mix(in srgb, var(--primary) 22%, transparent), transparent 70%),
+      radial-gradient(460px 300px at -20px 120px, color-mix(in srgb, var(--sand) 10%, transparent), transparent 70%), #0e1412; background-attachment: fixed; }
+    section:not(.hidden) { animation: fadeUp .32s ease both; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+    .status:empty, .note:empty { display: none; }
+    .card { border-radius: 24px; padding: 20px 18px; }
+    .card h2 { text-align: center; font-size: 1.12rem; }
+    .card h2::after { content: ""; display: block; width: 34px; height: 3px; margin: 7px auto 0; border-radius: 3px; background: var(--sand); }
+    .countdown-card h2::after { margin-bottom: 4px; }
+
+    /* section titles: one pretty centred card */
+    .panel-top { justify-content: center; margin: 4px 0 0; padding: 18px 16px; border-radius: 24px; position: relative; overflow: hidden; text-align: center; color: #fff;
+      background: var(--star), linear-gradient(135deg, var(--deep), color-mix(in srgb, var(--primary) 85%, #000)); box-shadow: 0 16px 30px -18px color-mix(in srgb, var(--primary) 85%, #000); }
+    .panel-top::after { content: ""; position: absolute; inset: auto 22% 0 22%; height: 3px; border-radius: 3px 3px 0 0; background: var(--sand); }
+    .panel-top h2 { margin: 0; color: #fff; text-align: center; font-size: 1.3rem; font-weight: 800; letter-spacing: .2px; }
+    #mushafPanel .panel-top { margin: 4px 0 0; }
+    .panel-top + .card { margin-top: 14px; }
+
+    /* home: soft coloured cards */
+    .countdown-card, .prayers-card, .sea-card, .quick-row button { background: linear-gradient(160deg, color-mix(in srgb, var(--pc) 15%, var(--surface)), var(--surface) 78%); border-color: color-mix(in srgb, var(--pc) 24%, var(--line)); }
+    .countdown-card { --pc: var(--primary); } .prayers-card { --pc: #d9a441; } .sea-card { --pc: #3b9fe3; }
+    .sea-card:hover, .quick-row button:hover { background: linear-gradient(160deg, color-mix(in srgb, var(--pc) 22%, var(--surface)), var(--surface) 78%); }
+    .quick-row button:nth-child(1) { --pc: #19a974; } .quick-row button:nth-child(2) { --pc: #3b82f6; } .quick-row button:nth-child(3) { --pc: #f59e0b; } .quick-row button:nth-child(4) { --pc: #8b5cf6; }
+    .quick-row button svg { stroke: color-mix(in srgb, var(--pc) 90%, #000); }
+    html[data-theme="dark"] .quick-row button svg { stroke: color-mix(in srgb, var(--pc) 70%, #fff); }
+    .quick-row button { border-radius: 20px; padding: 13px 4px 11px; }
+    .quick-row button svg { width: 26px; height: 26px; }
+    .prayer { background: color-mix(in srgb, var(--c1) 11%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c1) 18%, transparent); }
+    .prayer .value { font-size: 1.45rem; }
+    .prayer.next { background: linear-gradient(135deg, var(--deep), color-mix(in srgb, var(--primary) 80%, #000)); border-color: transparent; box-shadow: 0 16px 28px -16px var(--deep); }
+    .countdown { background: linear-gradient(180deg, var(--primary), var(--deep)); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+    #countdown { background: none; -webkit-text-fill-color: currentColor; }
+    html[data-theme="dark"] .countdown { background: linear-gradient(180deg, var(--soft), color-mix(in srgb, var(--soft) 60%, var(--primary))); -webkit-background-clip: text; background-clip: text; }
+    html[data-theme="dark"] #countdown { background: none; -webkit-text-fill-color: currentColor; }
+    .ramadan-card .countdown { background: none; -webkit-text-fill-color: #fff; }
+
+    /* other panels */
+    .radio-card { background: color-mix(in srgb, var(--rc1) 9%, var(--surface)); border: 1px solid color-mix(in srgb, var(--rc1) 18%, transparent); }
+    .radio-card.playing { background: color-mix(in srgb, var(--rc1) 16%, var(--surface)); }
+    .dhikr-item { background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--sand); box-shadow: 0 4px 12px -8px rgba(16,40,34,.3); }
+    .moon-item { background: linear-gradient(160deg, color-mix(in srgb, var(--c1) 12%, var(--surface)), var(--surface)); border: 1px solid color-mix(in srgb, var(--c1) 20%, transparent); }
+    .check-row, .setting select, .setting input { transition: border-color .15s, box-shadow .15s; }
+    button { box-shadow: 0 6px 14px -8px color-mix(in srgb, var(--primary) 70%, transparent); }
+    button.secondary, .bottom-nav button, .index-row, .cal-cell, .quick-row button, .fs-btn, .index-close, .fav-del, .lb-stop, .fs-pill, .index-tabs button, .adhkar-tabs button, .sea-card, .continue-btn { box-shadow: none; }
+    .quick-row button, .sea-card { box-shadow: var(--shadow); }
+    .bottom-nav { border-radius: 26px; padding: 6px 8px; }
+    .bottom-nav button { position: relative; border-radius: 18px; transition: color .2s, background-color .2s; }
+    .bottom-nav button[aria-current="page"]::after { content: ""; position: absolute; bottom: 2px; left: 50%; width: 16px; height: 3px; margin-left: -8px; border-radius: 3px; background: var(--sand); }
+    .bottom-nav button[aria-current="page"] svg { transform: translateY(-1px) scale(1.06); }
+    .bottom-nav svg { transition: transform .2s; }
+    header { box-shadow: 0 20px 36px -20px color-mix(in srgb, var(--primary) 85%, #000), inset 0 0 0 1px rgba(255,255,255,.08); }
+    .header-clock { text-shadow: 0 2px 12px rgba(0,0,0,.25); }
+
+    /* ===== weather: calm palette (no yellow/orange blocks) ===== */
+    .wd { background: #e6eef8; }
+    .wd.d0 { background: linear-gradient(120deg, #e7f0fa, #d3e4f6); }   /* شنبه – آبی ملایم */
+    .wd.d1 { background: linear-gradient(120deg, #e4f4ec, #cfeadc); }   /* یکشنبه – سبز نعنایی */
+    .wd.d2 { background: linear-gradient(120deg, #ede8f8, #dcd3f1); }   /* دوشنبه – یاسی */
+    .wd.d3 { background: linear-gradient(120deg, #f8e8ef, #f0d3e0); }   /* سه‌شنبه – صورتی ملایم */
+    .wd.d4 { background: linear-gradient(120deg, #def3f2, #c6e8e6); }   /* چهارشنبه – فیروزه‌ای */
+    .wd.d5 { background: linear-gradient(120deg, #e6e9fb, #d1d6f5); }   /* پنجشنبه – آبی-بنفش */
+    .wd.d6 { background: linear-gradient(120deg, #e9f1e2, #d6e6c9); }   /* جمعه – سبز مریمی */
+    .wd .tmax { color: #c2413c; } .wd .tmin { color: #3b6fd0; }
+    .w-ico.k-sun { stroke: #c99a2e; fill: #fbeab9; }
+    .w-ico.k-part { stroke: #3b6fd0; fill: #fbeab9; }
+    .w-now, .w-now.k-sun, .w-now.k-part { background: linear-gradient(135deg, #5aa9e6, #7b8cde); box-shadow: 0 12px 24px -12px #5b6fc9; }
+    .w-now.k-cloud, .w-now.k-fog { background: linear-gradient(135deg, #8fa3b8, #6f849c); box-shadow: 0 12px 24px -12px #5d7088; }
+    .w-now.k-rain { background: linear-gradient(135deg, #5b8bd9, #3c5fb0); } .w-now.k-storm { background: linear-gradient(135deg, #8d7ad8, #5b47ab); } .w-now.k-snow { background: linear-gradient(135deg, #8ccbe8, #5aa9d6); }
+    .w-grid div:nth-child(1) { background: #e3eefa; } .w-grid div:nth-child(2) { background: #def3f2; } .w-grid div:nth-child(3) { background: #e4f4ec; } .w-grid div:nth-child(4) { background: #ede8f8; }
+    .wh.k-sun { background: linear-gradient(180deg, #eef5fd, #d6e6f7); color: #0c4a6e; } .wh.k-sun small { color: #0369a1; }
+    .wh.k-part { background: linear-gradient(180deg, #eef5fd, #d6e6f7); }
   </style>
 </head>
 
@@ -657,7 +735,6 @@
             <div id="countdown" class="countdown">--:--:--</div>
           </div>
         </div>
-        <p class="note">زمان اقامه بر اساس تأخیرهای تنظیم‌شده در تنظیمات محاسبه می‌شود.</p>
       </div>
 
       <button type="button" class="sea-card" id="seaCard" aria-label="هواشناسی و جزر و مد">
@@ -666,7 +743,7 @@
         <div class="sea-col" id="seaTide"><small>جزر و مد</small><div class="sea-big"><b>—</b></div><span class="sea-sub">در حال دریافت…</span></div>
       </button>
 
-      <div class="card">
+      <div class="card prayers-card">
         <h2>نمازهای امروز</h2>
         <div id="prayerGrid" class="prayer-grid">
           <p class="status">در حال دریافت اوقات نماز…</p>
@@ -738,9 +815,8 @@
       <div class="panel-top"><h2>رویدادهای نجومی</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
       <div class="card">
         <h2>۱. وضعیت نجومی امروز</h2>
-        <p class="note">زمان‌های طلوع و غروب خورشید و ماه برای امروز در سوزا.</p>
         <button id="calculateTodayMoon" type="button">محاسبه وضعیت امروز</button>
-        <p id="todayMoonStatus" class="status" aria-live="polite">برای نمایش اطلاعات، دکمه را بزنید.</p>
+        <p id="todayMoonStatus" class="status" aria-live="polite"></p>
         <div class="moon-grid" style="margin-top:14px">
           <div class="moon-item" style="--c1:#f59e0b;--c2:#fcd34d">
             <div class="m-icon">
@@ -775,9 +851,8 @@
 
       <div class="card">
         <h2>۲. محاسبات ماه نو بر اساس مقارنه</h2>
-        <p class="note">مبنای محاسبه، لحظهٔ دقیق مقارنه و نخستین غروب خورشید پس از آن است؛ محاسبه صرفاً نجومی است و شامل داوری دربارهٔ رؤیت شرعی نیست.</p>
         <button id="calculateNewMoon" type="button">محاسبه وضعیت ماه نو</button>
-        <p id="newMoonStatus" class="status" aria-live="polite">برای محاسبه ماه نو، دکمه را بزنید.</p>
+        <p id="newMoonStatus" class="status" aria-live="polite"></p>
 
         <div class="moon-grid" style="margin-top:14px">
           <div class="moon-item" style="--c1:#6d28d9;--c2:#a78bfa">
@@ -813,7 +888,7 @@
         </div>
 
         <h3 style="margin-top:22px">رویدادهای نجومی ۳۰ روز آینده</h3>
-        <div id="moonEvents" class="status">پس از محاسبهٔ ماه نو نمایش داده می‌شود.</div>
+        <div id="moonEvents" class="status"></div>
       </div>
     </section>
 
@@ -977,9 +1052,12 @@
     <section id="settingsPanel" class="hidden">
       <div class="panel-top"><h2>تنظیمات</h2><button class="secondary" type="button" data-open="homePanel">⌂ خانه</button></div>
       <div class="card">
-        <h2>شهر و ظاهر برنامه</h2>
+        <h2>شهر، فقه و ظاهر</h2>
         <label class="setting">شهر (برای اوقات نماز و قبله)
           <select id="citySelect"></select>
+        </label>
+        <label class="setting" style="margin-top:12px">فقه (زمان نماز عصر)
+          <select id="schoolSelect"><option value="shafii">شافعی (پیش‌فرض)</option><option value="hanafi">حنفی</option></select>
         </label>
         <label class="setting" style="margin-top:12px">ظاهر برنامه
           <select id="themeSelect"><option value="auto">خودکار (مطابق گوشی)</option><option value="light">روشن</option><option value="dark">تاریک</option></select>
@@ -991,7 +1069,7 @@
           <button id="notifyPermission" type="button">🔔 فعال‌کردن اعلان‌ها</button>
           <button id="installButton" class="secondary hidden" type="button">⬇ نصب برنامه</button>
         </div>
-        <p class="note">اوقات نماز روی خود گوشی و بدون اینترنت محاسبه می‌شود (روش ام‌القری، فقه شافعی). ممکن است با تقویم‌های محلی تا یکی دو دقیقه اختلاف داشته باشد.</p>
+        <p class="note">اوقات نماز روی خود گوشی و بدون اینترنت محاسبه می‌شود (روش ام‌القری). فقه فقط زمان نماز عصر را تغییر می‌دهد. ممکن است با تقویم‌های محلی تا یکی دو دقیقه اختلاف داشته باشد.</p>
       </div>
       <div class="card">
         <h2>تنظیمات اقامه و اعلان‌ها</h2>
@@ -1038,6 +1116,7 @@
   <script>
     "use strict";
 
+    let ASR_FACTOR = 1;   // 1 = شافعی، 2 = حنفی
     let LATITUDE = 26.78;
     let LONGITUDE = 56.06;
     const TIME_ZONE = "Asia/Tehran";
@@ -1223,7 +1302,7 @@
         try { hijri = new Intl.DateTimeFormat("fa-IR-u-ca-islamic-umalqura", { timeZone: TIME_ZONE, year: "numeric", month: "long", day: "numeric" }).format(shifted); } catch {}
         let greg = "";
         try { greg = new Intl.DateTimeFormat("en-GB", { timeZone: TIME_ZONE, day: "numeric", month: "long", year: "numeric" }).format(now); } catch {}
-        if (el) el.innerHTML = `<span class="chip main">${persian}</span>` + (hijri ? `<span class="chip">${hijri}</span>` : "") + (greg ? `<span class="chip" dir="ltr">${greg}</span>` : "") + `<span class="chip tag">ام‌القری · شافعی</span>`;
+        if (el) el.innerHTML = `<span class="chip main">${persian}</span>` + (hijri ? `<span class="chip">${hijri}</span>` : "") + (greg ? `<span class="chip" dir="ltr">${greg}</span>` : "") + `<span class="chip tag">ام‌القری · ${ASR_FACTOR === 2 ? "حنفی" : "شافعی"}</span>`;
       } catch (e) {
         console.error("خطا در نمایش تاریخ:", e);
         if (el) el.textContent = new Date().toLocaleString("fa-IR");
@@ -1255,7 +1334,7 @@
         if (eqt < -12) eqt += 24;
         return { decl: asin(sin(e) * sin(L)), eqt };
       }
-      function compute(year, month, day, lat, lng, tz, ishaMinutes) {
+      function compute(year, month, day, lat, lng, tz, ishaMinutes, asrFactor) {
         const jd = julian(year, month, day) - lng / (15 * 24);
         const midDay = t => fix(12 - sunPos(jd + t).eqt, 24);
         const angleTime = (angle, t, ccw) => {
@@ -1275,7 +1354,7 @@
             fajr: angleTime(18.5, t.fajr / 24, true),
             sunrise: angleTime(0.833, t.sunrise / 24, true),
             dhuhr: midDay(t.dhuhr / 24),
-            asr: asrTime(1, t.asr / 24),
+            asr: asrTime(asrFactor || 1, t.asr / 24),
             sunset: angleTime(0.833, t.sunset / 24, false)
           };
         }
@@ -1308,7 +1387,7 @@
     }
     function computePrayerDay(date) {
       const p = localDateParts(date);
-      const r = PrayerCalc.compute(p.year, p.month, p.day, LATITUDE, LONGITUDE, tzOffsetHours(p.year, p.month, p.day), isRamadan(p.year, p.month, p.day) ? 120 : 90);
+      const r = PrayerCalc.compute(p.year, p.month, p.day, LATITUDE, LONGITUDE, tzOffsetHours(p.year, p.month, p.day), isRamadan(p.year, p.month, p.day) ? 120 : 90, ASR_FACTOR);
       const timings = {};
       [["Fajr", "fajr"], ["Sunrise", "sunrise"], ["Dhuhr", "dhuhr"], ["Asr", "asr"], ["Sunset", "sunset"], ["Maghrib", "maghrib"], ["Isha", "isha"]].forEach(([k, v]) => { timings[k] = hoursToClock(r[v]); });
       return { timings };
@@ -1322,7 +1401,7 @@
         prayerData = { ...today, tomorrowFajr: tomorrow.timings.Fajr };
         renderPrayerTimes();
         try { updateCountdown(); } catch {}
-        if (statusEl) statusEl.textContent = "✓ اوقات روی خود گوشی محاسبه می‌شود (روش ام‌القری، فقه شافعی) و به اینترنت نیاز ندارد.";
+        if (statusEl) statusEl.textContent = "";
       } catch (error) {
         console.error(error);
         if (statusEl) statusEl.textContent = "محاسبهٔ اوقات نماز با خطا روبه‌رو شد.";
@@ -1505,7 +1584,7 @@
           });
           window.scrollTo({ top: 0, behavior: "smooth" });
           if (target === "mushafPanel") { try { openMainReader(); } catch (e) { console.error(e); } }
-          if (target === "moonPanel") { try { loadAstronomy(); } catch {} }
+          if (target === "moonPanel") { try { loadAstronomy(ok => { if (ok) { if (!window.__moonAuto) { window.__moonAuto = true; calculateTodayMoon(); } } else setMoonStatus("todayMoonStatus", "دریافت کتابخانهٔ نجومی ممکن نشد؛ با اینترنت دکمهٔ محاسبه را بزنید."); }); } catch {} }
           const hd = document.querySelector("header"); if (hd) hd.classList.toggle("hidden", target !== "homePanel");
         });
       });
@@ -2942,7 +3021,7 @@
     const t = prayerData.timings, c = currentCity();
     const names = [["Fajr", "اذان صبح"], ["Sunrise", "طلوع آفتاب"], ["Dhuhr", "اذان ظهر"], ["Asr", "اذان عصر"], ["Maghrib", "اذان مغرب"], ["Isha", "اذان عشاء"]];
     const lines = names.map(([k, n]) => `${n}: ${fa(t[k])}`).join("\n");
-    shareText("اوقات نماز " + c.short, `اوقات نماز ${c.short}\n${fullDateLine(new Date())}\n\n${lines}\n\n(روش ام‌القری، فقه شافعی)\n${location.href.split("#")[0]}`);
+    shareText("اوقات نماز " + c.short, `اوقات نماز ${c.short}\n${fullDateLine(new Date())}\n\n${lines}\n\n(روش ام‌القری، فقه ${ASR_FACTOR === 2 ? "حنفی" : "شافعی"})\n${location.href.split("#")[0]}`);
   }
   async function sharePage() {
     const page = mushafPage, info = mushafPageInfo(page);
@@ -3301,7 +3380,7 @@
       const dirs = ["شمال","شمال‌شرق","شرق","جنوب‌شرق","جنوب","جنوب‌غرب","غرب","شمال‌غرب"], wd = dirs[Math.round(c.wind_direction_10m / 45) % 8];
       const hrs = []; const now = Date.now();
       for (let i = 0; i < w.hourly.time.length && hrs.length < 12; i++) { const ms = toDate(w.hourly.time[i]).getTime(); if (ms >= now - 1800000) hrs.push(`<div class="wh k-${wcode(w.hourly.weather_code[i])[1]}"><small>${hhmm(ms)}</small>${wIcon(wcode(w.hourly.weather_code[i])[1])}<b>${num(w.hourly.temperature_2m[i], 0)}°</b></div>`); }
-      const days = d.time.map((dt, i) => { const nm = i === 0 ? "امروز" : new Intl.DateTimeFormat("fa-IR", { timeZone: TIME_ZONE, weekday: "long" }).format(new Date(dt + "T12:00:00" + TZ_OFF)); const [tx, kd] = wcode(d.weather_code[i]); return `<div class="wd k-${kd}"><b>${nm}</b>${wIcon(kd)}<span>${tx}</span><em dir="ltr"><i class="tmax">${num(d.temperature_2m_max[i], 0)}°</i> <i class="tmin">${num(d.temperature_2m_min[i], 0)}°</i></em><small>${d.precipitation_probability_max[i] != null ? "بارش " + fa(d.precipitation_probability_max[i]) + "٪" : ""}</small></div>`; }).join("");
+      const days = d.time.map((dt, i) => { const nm = i === 0 ? "امروز" : new Intl.DateTimeFormat("fa-IR", { timeZone: TIME_ZONE, weekday: "long" }).format(new Date(dt + "T12:00:00" + TZ_OFF)); const [tx, kd] = wcode(d.weather_code[i]); return `<div class="wd d${(new Date(dt + "T12:00:00" + TZ_OFF).getUTCDay() + 1) % 7}"><b>${nm}</b>${wIcon(kd)}<span>${tx}</span><em dir="ltr"><i class="tmax">${num(d.temperature_2m_max[i], 0)}°</i> <i class="tmin">${num(d.temperature_2m_min[i], 0)}°</i></em><small>${d.precipitation_probability_max[i] != null ? "بارش " + fa(d.precipitation_probability_max[i]) + "٪" : ""}</small></div>`; }).join("");
       body.innerHTML = `<div class="w-now k-${kind}">${wIcon(kind)}<div><b>${num(c.temperature_2m, 0)}°</b><span>${txt}</span></div></div>
         <div class="w-grid"><div><small>احساس دما</small><b>${num(c.apparent_temperature, 0)}°</b></div><div><small>رطوبت</small><b>${fa(Math.round(c.relative_humidity_2m))}٪</b></div><div><small>باد</small><b>${num(c.wind_speed_10m, 0)} km/h</b><em>${wd}</em></div><div><small>فشار</small><b>${fa(Math.round(c.surface_pressure))} hPa</b></div></div>
         <h3 style="margin:16px 0 8px">ساعت‌های آینده</h3><div class="wh-row">${hrs.join("")}</div>
@@ -3342,6 +3421,9 @@
     const cs = $("citySelect");
     if (cs) { cs.innerHTML = CITIES.map(c => `<option value="${c.id}">${c.name}</option>`).join(""); cs.addEventListener("change", () => { applyCity(cs.value, true); toast("شهر: " + currentCity().name); }); }
     const ts = $("themeSelect"); if (ts) ts.addEventListener("change", () => { try { localStorage.setItem(THEME_KEY, ts.value); } catch {} applyThemeMode(); });
+    try { ASR_FACTOR = localStorage.getItem("suza-school") === "hanafi" ? 2 : 1; } catch {}
+    const ss = $("schoolSelect");
+    if (ss) { ss.value = ASR_FACTOR === 2 ? "hanafi" : "shafii"; ss.addEventListener("change", () => { ASR_FACTOR = ss.value === "hanafi" ? 2 : 1; try { localStorage.setItem("suza-school", ss.value); } catch {} try { loadPrayerTimes(); loadDateHeader(); updateCountdown(); } catch (e) { console.error(e); } toast("فقه: " + (ASR_FACTOR === 2 ? "حنفی" : "شافعی")); }); }
     applyCity(currentCity().id, false);
     initHeaderClock(); initSea();
     keepStoragePersistent(); updateStoreInfo(); setInterval(updateStoreInfo, 8000);
