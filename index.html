@@ -720,16 +720,6 @@
     .ring-txt { position: absolute; inset: 0; display: grid; place-content: center; text-align: center; line-height: 1.25; }
     .ring-txt b { font-size: 1.15rem; font-weight: 800; font-variant-numeric: tabular-nums; } .ring-txt small { font-size: .72rem; color: var(--muted); font-weight: 700; }
 
-    /* ===== page turn ===== */
-    .mushaf-fullscreen .flip-layer { position: fixed; inset: 0; z-index: 5; pointer-events: none; transform-origin: right center; backface-visibility: hidden; will-change: transform;
-      animation: pageFlip .42s cubic-bezier(.45,.05,.75,.45) forwards; }
-    .mushaf-fullscreen .flip-layer.back { transform-origin: left center; animation-name: pageFlipBack; }
-    .mushaf-fullscreen .flip-layer::after { content: ""; position: absolute; inset: 0; opacity: 0; background: linear-gradient(to left, rgba(0,0,0,.5), rgba(0,0,0,0) 65%); animation: flipShade .42s ease-in forwards; }
-    .mushaf-fullscreen .flip-layer.back::after { background: linear-gradient(to right, rgba(0,0,0,.5), rgba(0,0,0,0) 65%); }
-    @keyframes pageFlip { from { transform: perspective(1800px) rotateY(0deg); } to { transform: perspective(1800px) rotateY(88deg); } }
-    @keyframes pageFlipBack { from { transform: perspective(1800px) rotateY(0deg); } to { transform: perspective(1800px) rotateY(-88deg); } }
-    @keyframes flipShade { to { opacity: 1; } }
-
     /* ===== favourites: reading mark ===== */
     .fav-row.marked { border-color: color-mix(in srgb, var(--sand) 60%, transparent); }
     .fav-bar { display: block; height: 5px; margin-top: 6px; border-radius: 99px; background: var(--tint-2); overflow: hidden; }
@@ -749,6 +739,13 @@
     .bottom-nav button:nth-child(4) { --na: #7a5bc7; } .bottom-nav button:nth-child(5) { --na: #4c57c8; } .bottom-nav button:nth-child(6) { --na: #5f7184; }
     html[data-theme="dark"] .bottom-nav button[aria-current="page"] { color: color-mix(in srgb, var(--na) 55%, #fff); }
     .bottom-nav button[aria-current="page"]::after { background: var(--na, var(--sand)); }
+
+    /* tasbih: the whole card is the counter */
+    .tasbih-card { touch-action: manipulation; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; cursor: pointer; }
+    .tasbih-card select, .tasbih-card button { user-select: auto; cursor: pointer; }
+    .tasbih-count.pulse { animation: tPulse .2s ease; }
+    @keyframes tPulse { 0% { transform: scale(1); } 45% { transform: scale(1.08); } 100% { transform: scale(1); } }
+    .tasbih-card:active .tasbih-count { filter: brightness(.97); }
   </style>
 </head>
 
@@ -847,9 +844,9 @@
         <div id="eveningAdhkar" class="adhkar-list hidden" data-adpane="evening"></div>
         <div id="afterAdhkar" class="adhkar-list hidden" data-adpane="after"></div>
       </div>
-      <div class="card">
+      <div class="card tasbih-card" id="tasbihCard">
         <h2>تسبیح هوشمند</h2>
-        <p class="note">شمارش با لمس دکمه انجام می‌شود و پس از بستن صفحه نیز شمارش در همین دستگاه می‌ماند.</p>
+        <p class="note">هرجای کارت را لمس کنید تا یک ذکر شمرده شود (به‌جز دکمه‌ها و انتخاب‌ها). شمارش بعد از بستن برنامه هم می‌ماند.</p>
         <label class="setting">ذکر مورد نظر
           <select id="tasbihPhrase"><option>سُبْحَانَ اللَّهِ</option><option>الْحَمْدُ لِلَّهِ</option><option>اللَّهُ أَكْبَرُ</option><option>أَسْتَغْفِرُ اللَّهَ</option><option>لَا إِلَهَ إِلَّا اللَّهُ</option><option>اللَّهُمَّ صَلِّ عَلَى مُحَمَّدٍ</option></select>
         </label>
@@ -859,7 +856,7 @@
         <div id="tasbihPhrasePreview" class="dhikr-text" style="text-align:center;margin-top:14px">سُبْحَانَ اللَّهِ</div>
         <div id="tasbihCount" class="tasbih-count">۰</div>
         <p id="tasbihStatus" class="status" style="text-align:center">برای شروع دکمه را لمس کنید.</p>
-        <div class="tasbih-actions"><button id="tasbihTap" type="button" style="min-width:150px;min-height:64px;font-size:1.1rem">+ یک ذکر</button><button id="tasbihUndo" class="secondary" type="button">یک مرحله برگشت</button><button id="tasbihReset" class="secondary" type="button">شروع مجدد</button></div>
+        <div class="tasbih-actions"><button id="tasbihUndo" class="secondary" type="button">یک مرحله برگشت</button><button id="tasbihReset" class="secondary" type="button">شروع مجدد</button></div>
       </div>
     </section>
 
@@ -1689,9 +1686,7 @@
     function showMushafPage(page) {
       const next = Math.max(1, Math.min(604, Math.trunc(Number(page) || 1)));
       mushafPrimed = true;
-      const prevPage = mushafPage;
       mushafPage = next;
-      if (fullscreenWrap && Math.abs(next - prevPage) === 1 && typeof window.mushafFlip === "function") window.mushafFlip(next > prevPage ? 1 : -1);
       updateFsBar();
       updateMushafHome();
       const image = byId("mushafImage");
@@ -2349,7 +2344,14 @@
     function setupAdhkar() {
       renderDhikrList("morningAdhkar", ADHKAR_MORNING); renderDhikrList("eveningAdhkar", ADHKAR_EVENING);
       try { const saved = JSON.parse(localStorage.getItem("suza-tasbih") || "{}"); tasbihCount = Math.max(0, Number(saved.count) || 0); if (saved.phrase && byId("tasbihPhrase")) byId("tasbihPhrase").value = saved.phrase; if (saved.target && byId("tasbihTarget")) byId("tasbihTarget").value = saved.target; } catch {}
-      byId("tasbihTap")?.addEventListener("click", () => { tasbihCount++; updateTasbih(); });
+      const tCard = byId("tasbihCard");
+      if (tCard) tCard.addEventListener("click", e => {
+        if (e.target.closest("button, select, option, label, input, a")) return;
+        tasbihCount++; updateTasbih();
+        const ce = byId("tasbihCount"), tg = Number(byId("tasbihTarget")?.value || 0);
+        if (ce) { ce.classList.remove("pulse"); void ce.offsetWidth; ce.classList.add("pulse"); }
+        try { if (navigator.vibrate) navigator.vibrate(tg && tasbihCount === tg ? [70, 50, 70] : 12); } catch {}
+      });
       byId("tasbihUndo")?.addEventListener("click", () => { tasbihCount = Math.max(0, tasbihCount - 1); updateTasbih(); });
       byId("tasbihReset")?.addEventListener("click", () => { tasbihCount = 0; updateTasbih(); });
       byId("tasbihPhrase")?.addEventListener("change", updateTasbih); byId("tasbihTarget")?.addEventListener("change", updateTasbih); updateTasbih();
@@ -3423,7 +3425,7 @@
     const w = $("seaWeather"), t = $("seaTide"); if (!w || !t) return;
     const cw = currentWeather(seaState);
     if (cw) w.innerHTML = `<small>هوا</small><div class="sea-big">${wIcon(cw.kind)}<b>${num(cw.c.temperature_2m, 0)}°</b></div><span class="sea-sub">${cw.txt} · باد ${num(cw.c.wind_speed_10m, 0)} km/h</span>`;
-    else w.innerHTML = `<small>هوا</small><div class="sea-big"><b>—</b></div><span class="sea-sub">${seaState && seaState.errW ? "دریافت نشد؛ لمس کنید" : "در حال دریافت…"}</span>`;
+    else w.innerHTML = `<small>هوا</small><div class="sea-big"><b>—</b></div><span class="sea-sub">${seaState && seaState.errW ? (navigator.onLine === false ? "بدون اینترنت" : "دریافت نشد؛ لمس کنید") : "در حال دریافت…"}</span>`;
     if (seaState && seaState.marine && hasTide(seaState.marine)) {
       const pts = tidePoints(seaState.marine), now = Date.now(), lv = levelAt(pts, now), nx = levelAt(pts, now + 1800000);
       const ex = extremes(pts).filter(e => e.t > now)[0];
@@ -3433,7 +3435,7 @@
         return;
       }
     }
-    t.innerHTML = `<small>جزر و مد</small><div class="sea-big"><b>—</b></div><span class="sea-sub">${seaState && seaState.errM ? "دریافت نشد؛ لمس کنید" : "در حال دریافت…"}</span>`;
+    t.innerHTML = `<small>جزر و مد</small><div class="sea-big"><b>—</b></div><span class="sea-sub">${seaState && seaState.errM ? (navigator.onLine === false ? "بدون اینترنت" : "دریافت نشد؛ لمس کنید") : "در حال دریافت…"}</span>`;
   }
 
   function openSea(startTab) {
@@ -3500,6 +3502,7 @@
     const card = $("seaCard"); if (!card) return;
     card.addEventListener("click", e => openSea(e.target.closest("#seaTide") ? "tide" : "weather"));
     seaState = sCache(); if (seaState && seaState.city) renderSeaCard();
+    window.addEventListener("online", () => refreshSea(false));
     setTimeout(() => refreshSea(false), 1800);
     seaTimer = setInterval(() => { renderSeaCard(); refreshSea(false); }, 5 * 60000);
   }
@@ -3513,18 +3516,6 @@
   async function keepStoragePersistent() {
     try { if (navigator.storage && navigator.storage.persist && !(await navigator.storage.persisted())) await navigator.storage.persist(); } catch {}
   }
-
-  window.mushafFlip = function (dir) {
-    if (!fullscreenWrap || !fullscreenFrame) return;
-    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    fullscreenWrap.querySelectorAll(".flip-layer").forEach(n => n.remove());
-    const layer = document.createElement("div");
-    layer.className = "flip-layer" + (dir < 0 ? " back" : "");
-    layer.appendChild(fullscreenFrame.cloneNode(true));
-    fullscreenWrap.appendChild(layer);
-    layer.addEventListener("animationend", e => { if (e.target === layer) layer.remove(); });
-    setTimeout(() => layer.remove(), 800);
-  };
 
   /* ---------- حلقه پیشرفت تا نماز بعدی ---------- */
   function ringTick() {
